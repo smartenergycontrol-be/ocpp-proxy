@@ -58,3 +58,13 @@ class Config:
         """Return list of OCPP service configurations for outbound connections."""
         value = self._cfg.get('ocpp_services', [])
         return list(value) if value is not None else []
+
+    @property
+    def ocpp_version(self) -> str:
+        """Return OCPP version to use (1.6 or 2.0.1)."""
+        return str(self._cfg.get('ocpp_version', '1.6'))
+
+    @property
+    def auto_detect_ocpp_version(self) -> bool:
+        """Return whether to auto-detect OCPP version from incoming connections."""
+        return bool(self._cfg.get('auto_detect_ocpp_version', True))

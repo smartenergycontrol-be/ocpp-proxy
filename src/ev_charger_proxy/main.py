@@ -8,7 +8,7 @@ import io
 import csv
 
 from .config import Config
-from .charge_point import ChargePoint
+from .charge_point_factory import ChargePointFactory
 from .backend_manager import BackendManager
 from .ha_bridge import HABridge
 from .logger import EventLogger
@@ -22,15 +22,18 @@ async def charger_handler(request: web.Request) -> web.WebSocketResponse:
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    cp = ChargePoint(
+    config = request.app['config']
+    cp = ChargePointFactory.create_charge_point(
         'CP-1', ws,
+        version=config.ocpp_version,
         manager=request.app['backend_manager'],
         ha_bridge=request.app['ha_bridge'],
         event_logger=request.app['event_logger'],
+        auto_detect=config.auto_detect_ocpp_version
     )
     # store active charge point for proxying control requests
     request.app['charge_point'] = cp
-    _LOGGER.info('Charger connected')
+    _LOGGER.info(f'Charger connected using OCPP {cp.ocpp_version}')
     try:
         await cp.start()
     except Exception:
@@ -136,21 +139,21 @@ async def backend_handler(request: web.Request) -> web.WebSocketResponse:
             if msg.type == web.WSMsgType.TEXT:
                 data = msg.json()
                 action = data.get('action')
-                cp: ChargePoint = request.app.get('charge_point')
+                cp = request.app.get('charge_point')
                 # Remote start request
                 if action == 'RemoteStartTransaction' and cp:
                     allowed = await manager.request_control(backend_id)
                     if not allowed:
                         await ws.send_json({'error': 'control_locked'})
                         continue
-                    req = await cp.call_remote_start_transaction(
+                    req = await cp.send_remote_start_transaction(
                         connector_id=data.get('connector_id', 1),
                         id_tag=data.get('id_tag')
                     )
                     await ws.send_json({'action': 'RemoteStartTransaction', 'result': req})
                 # Remote stop request
                 elif action == 'RemoteStopTransaction' and cp:
-                    req = await cp.call_remote_stop_transaction(
+                    req = await cp.send_remote_stop_transaction(
                         transaction_id=data.get('transaction_id')
                     )
                     await ws.send_json({'action': 'RemoteStopTransaction', 'result': req})

@@ -203,10 +203,10 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                     charge_point.manager = self.app['backend_manager']
                     
                     # Import the actual ChargePoint class to test event methods
-                    from src.ev_charger_proxy.charge_point import ChargePoint
+                    from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
                     
                     # Create a real ChargePoint instance for testing event methods
-                    real_cp = ChargePoint('CP-1', ws, manager=self.app['backend_manager'])
+                    real_cp = ChargePointV16('CP-1', ws, manager=self.app['backend_manager'])
                     
                     # Test boot notification event
                     await real_cp.on_boot_notification('TestVendor', 'TestModel')
@@ -255,14 +255,14 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             # Mock backend manager
             with patch.object(self.app['backend_manager'], '_lock_owner', 'test_backend'):
                 # Create a real ChargePoint instance for testing
-                from src.ev_charger_proxy.charge_point import ChargePoint
+                from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
                 
                 # Mock WebSocket connection
                 mock_ws = Mock()
                 mock_ws.send = AsyncMock()
                 mock_ws.recv = AsyncMock()
                 
-                cp = ChargePoint(
+                cp = ChargePointV16(
                     'CP-1', 
                     mock_ws, 
                     manager=self.app['backend_manager'],
@@ -381,13 +381,13 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
         with patch.object(self.app['backend_manager'], 'release_control') as mock_release:
             with patch.object(self.app['ha_bridge'], 'send_notification') as mock_notify:
                 # Create a real ChargePoint instance for testing
-                from src.ev_charger_proxy.charge_point import ChargePoint
+                from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
                 
                 mock_ws = Mock()
                 mock_ws.send = AsyncMock()
                 mock_ws.recv = AsyncMock()
                 
-                cp = ChargePoint(
+                cp = ChargePointV16(
                     'CP-1', 
                     mock_ws, 
                     manager=self.app['backend_manager'],
@@ -469,13 +469,13 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             # Mock backend manager to include OCPP service
             with patch.object(self.app['backend_manager'], 'broadcast_event') as mock_backend_broadcast:
                 # Create a real ChargePoint instance for testing
-                from src.ev_charger_proxy.charge_point import ChargePoint
+                from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
                 
                 mock_ws = Mock()
                 mock_ws.send = AsyncMock()
                 mock_ws.recv = AsyncMock()
                 
-                cp = ChargePoint(
+                cp = ChargePointV16(
                     'CP-1', 
                     mock_ws, 
                     manager=self.app['backend_manager']
