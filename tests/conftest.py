@@ -7,10 +7,10 @@ import os
 import sqlite3
 from unittest.mock import Mock, AsyncMock
 
-from src.ev_charger_proxy.config import Config
-from src.ev_charger_proxy.backend_manager import BackendManager
-from src.ev_charger_proxy.logger import EventLogger
-from src.ev_charger_proxy.ha_bridge import HABridge
+from src.ocpp_proxy.config import Config
+from src.ocpp_proxy.backend_manager import BackendManager
+from src.ocpp_proxy.logger import EventLogger
+from src.ocpp_proxy.ha_bridge import HABridge
 
 
 @pytest.fixture

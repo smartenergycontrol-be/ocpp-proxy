@@ -7,7 +7,7 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, make_mocked_request
 import aiohttp
 
-from src.ev_charger_proxy.main import (
+from src.ocpp_proxy.main import (
     init_app, charger_handler, backend_handler, sessions_json, sessions_csv,
     override_handler, status_handler, welcome_handler, cleanup_app
 )
@@ -37,7 +37,7 @@ class TestMainApplication(AioHTTPTestCase):
     async def get_application(self):
         """Create application for testing."""
         with patch.dict(os.environ, {'HA_URL': '', 'HA_TOKEN': ''}):
-            with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+            with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
                 mock_ocpp_manager.return_value.start_services = AsyncMock()
                 mock_ocpp_manager.return_value.get_service_status = Mock(return_value={})
                 app = await init_app()
@@ -173,7 +173,7 @@ class TestMainApplication(AioHTTPTestCase):
         """Test the charger WebSocket handler."""
         # This is a complex test as it involves WebSocket connections
         # We'll mock the WebSocket and ChargePoint
-        with patch('src.ev_charger_proxy.main.ChargePoint') as mock_cp_class:
+        with patch('src.ocpp_proxy.main.ChargePoint') as mock_cp_class:
             mock_cp = Mock()
             mock_cp.start = AsyncMock()
             mock_cp_class.return_value = mock_cp
@@ -459,7 +459,7 @@ class TestMainApplicationInitialization:
     async def test_init_app_with_ha_environment(self):
         """Test app initialization with HA environment variables."""
         with patch.dict(os.environ, {'HA_URL': 'http://ha.local', 'HA_TOKEN': 'token123'}):
-            with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+            with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
                 mock_ocpp_manager.return_value.start_services = AsyncMock()
                 
                 app = await init_app()
@@ -473,7 +473,7 @@ class TestMainApplicationInitialization:
     async def test_init_app_without_ha_environment(self):
         """Test app initialization without HA environment variables."""
         with patch.dict(os.environ, {'HA_URL': '', 'HA_TOKEN': ''}, clear=True):
-            with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+            with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
                 mock_ocpp_manager.return_value.start_services = AsyncMock()
                 
                 app = await init_app()
@@ -487,10 +487,10 @@ class TestMainApplicationInitialization:
     async def test_init_app_custom_db_path(self):
         """Test app initialization with custom database path."""
         with patch.dict(os.environ, {'LOG_DB_PATH': '/custom/path/log.db'}):
-            with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+            with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
                 mock_ocpp_manager.return_value.start_services = AsyncMock()
                 
-                with patch('src.ev_charger_proxy.main.EventLogger') as mock_logger:
+                with patch('src.ocpp_proxy.main.EventLogger') as mock_logger:
                     app = await init_app()
                     
                     mock_logger.assert_called_once_with(db_path='/custom/path/log.db')
@@ -498,7 +498,7 @@ class TestMainApplicationInitialization:
     @pytest.mark.asyncio
     async def test_init_app_route_registration(self):
         """Test that all routes are registered correctly."""
-        with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+        with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
             mock_ocpp_manager.return_value.start_services = AsyncMock()
             
             app = await init_app()
@@ -517,7 +517,7 @@ class TestMainApplicationInitialization:
     @pytest.mark.asyncio
     async def test_init_app_ocpp_service_startup(self):
         """Test that OCPP services are started during initialization."""
-        with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+        with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
             mock_manager_instance = Mock()
             mock_manager_instance.start_services = AsyncMock()
             mock_ocpp_manager.return_value = mock_manager_instance
@@ -530,10 +530,10 @@ class TestMainApplicationInitialization:
     @pytest.mark.asyncio
     async def test_init_app_backend_manager_app_reference(self):
         """Test that backend manager gets app reference."""
-        with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+        with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
             mock_ocpp_manager.return_value.start_services = AsyncMock()
             
-            with patch('src.ev_charger_proxy.main.BackendManager') as mock_backend_manager:
+            with patch('src.ocpp_proxy.main.BackendManager') as mock_backend_manager:
                 mock_manager_instance = Mock()
                 mock_manager_instance.set_app_reference = Mock()
                 mock_backend_manager.return_value = mock_manager_instance

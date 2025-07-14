@@ -7,10 +7,10 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy application source
 WORKDIR /app
-COPY src/ev_charger_proxy /app/ev_charger_proxy
+COPY src/ocpp_proxy /app/ocpp_proxy
 
 # Expose WebSocket port
 EXPOSE 9000
 
 # Run the proxy server
-CMD ["python3", "-m", "ev_charger_proxy.main"]
+CMD ["python3", "-m", "ocpp_proxy.main"]

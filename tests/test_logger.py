@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from unittest.mock import patch, Mock
 
-from src.ev_charger_proxy.logger import EventLogger
+from src.ocpp_proxy.logger import EventLogger
 
 
 class TestEventLogger:
@@ -393,7 +393,7 @@ class TestEventLogger:
         assert abs(session['energy_kwh'] - 25.987654321) < 1e-6
         assert abs(session['revenue'] - 5.12345678901234567890) < 1e-6
 
-    @patch('src.ev_charger_proxy.logger.datetime')
+    @patch('src.ocpp_proxy.logger.datetime')
     def test_log_session_timestamp_format(self, mock_datetime, event_logger):
         """Test that timestamp is in correct ISO format."""
         # Mock datetime to return specific time

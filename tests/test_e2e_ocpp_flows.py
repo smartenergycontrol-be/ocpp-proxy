@@ -9,7 +9,7 @@ from aiohttp.test_utils import AioHTTPTestCase
 import websockets
 import yaml
 
-from src.ev_charger_proxy.main import init_app
+from src.ocpp_proxy.main import init_app
 
 
 class TestOCPPFlowsE2E(AioHTTPTestCase):
@@ -39,7 +39,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
     async def get_application(self):
         """Create application for testing."""
         with patch.dict(os.environ, {'HA_URL': '', 'HA_TOKEN': ''}):
-            with patch('src.ev_charger_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
+            with patch('src.ocpp_proxy.main.OCPPServiceManager') as mock_ocpp_manager:
                 mock_ocpp_manager.return_value.start_services = AsyncMock()
                 mock_ocpp_manager.return_value.get_service_status = Mock(return_value={})
                 mock_ocpp_manager.return_value.broadcast_event_to_services = Mock()
@@ -50,7 +50,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
     async def test_charger_boot_sequence(self):
         """Test complete charger boot sequence."""
         # Mock ChargePoint to capture boot sequence
-        with patch('src.ev_charger_proxy.main.ChargePoint') as mock_cp_class:
+        with patch('src.ocpp_proxy.main.ChargePoint') as mock_cp_class:
             mock_cp = Mock()
             mock_cp.start = AsyncMock()
             mock_cp_class.return_value = mock_cp
@@ -193,7 +193,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             mock_cp = Mock()
             mock_cp.start = AsyncMock()
             
-            with patch('src.ev_charger_proxy.main.ChargePoint') as mock_cp_class:
+            with patch('src.ocpp_proxy.main.ChargePoint') as mock_cp_class:
                 mock_cp_class.return_value = mock_cp
                 
                 # Connect charger
@@ -203,7 +203,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                     charge_point.manager = self.app['backend_manager']
                     
                     # Import the actual ChargePoint class to test event methods
-                    from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
+                    from src.ocpp_proxy.charge_point_v16 import ChargePointV16
                     
                     # Create a real ChargePoint instance for testing event methods
                     real_cp = ChargePointV16('CP-1', ws, manager=self.app['backend_manager'])
@@ -255,7 +255,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             # Mock backend manager
             with patch.object(self.app['backend_manager'], '_lock_owner', 'test_backend'):
                 # Create a real ChargePoint instance for testing
-                from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
+                from src.ocpp_proxy.charge_point_v16 import ChargePointV16
                 
                 # Mock WebSocket connection
                 mock_ws = Mock()
@@ -381,7 +381,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
         with patch.object(self.app['backend_manager'], 'release_control') as mock_release:
             with patch.object(self.app['ha_bridge'], 'send_notification') as mock_notify:
                 # Create a real ChargePoint instance for testing
-                from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
+                from src.ocpp_proxy.charge_point_v16 import ChargePointV16
                 
                 mock_ws = Mock()
                 mock_ws.send = AsyncMock()
@@ -469,7 +469,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             # Mock backend manager to include OCPP service
             with patch.object(self.app['backend_manager'], 'broadcast_event') as mock_backend_broadcast:
                 # Create a real ChargePoint instance for testing
-                from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
+                from src.ocpp_proxy.charge_point_v16 import ChargePointV16
                 
                 mock_ws = Mock()
                 mock_ws.send = AsyncMock()
@@ -502,8 +502,8 @@ class TestOCPPServiceFlows:
     @pytest.mark.asyncio
     async def test_ocpp_service_authentication_flow(self):
         """Test OCPP service authentication flows."""
-        from src.ev_charger_proxy.ocpp_service_manager import OCPPServiceManager
-        from src.ev_charger_proxy.config import Config
+        from src.ocpp_proxy.ocpp_service_manager import OCPPServiceManager
+        from src.ocpp_proxy.config import Config
         
         # Test different authentication types
         config = Mock(spec=Config)
@@ -539,7 +539,7 @@ class TestOCPPServiceFlows:
             mock_conn = Mock()
             return mock_conn
         
-        with patch('src.ev_charger_proxy.ocpp_service_manager.websockets.connect', side_effect=mock_connect):
+        with patch('src.ocpp_proxy.ocpp_service_manager.websockets.connect', side_effect=mock_connect):
             # Test token auth
             await manager.connect_service('token_service', config.ocpp_services[0])
             
@@ -564,7 +564,7 @@ class TestOCPPServiceFlows:
     @pytest.mark.asyncio
     async def test_ocpp_service_control_flow(self):
         """Test OCPP service control request flow."""
-        from src.ev_charger_proxy.ocpp_service_manager import OCPPServiceClient
+        from src.ocpp_proxy.ocpp_service_manager import OCPPServiceClient
         
         # Mock backend manager
         mock_backend_manager = Mock()
@@ -608,7 +608,7 @@ class TestOCPPServiceFlows:
     @pytest.mark.asyncio
     async def test_ocpp_service_event_forwarding(self):
         """Test event forwarding to OCPP services."""
-        from src.ev_charger_proxy.ocpp_service_manager import OCPPServiceManager, OCPPServiceClient
+        from src.ocpp_proxy.ocpp_service_manager import OCPPServiceManager, OCPPServiceClient
         
         # Create mock services
         mock_client1 = Mock(spec=OCPPServiceClient)
@@ -656,7 +656,7 @@ class TestOCPPServiceFlows:
     @pytest.mark.asyncio
     async def test_ocpp_service_heartbeat_flow(self):
         """Test OCPP service heartbeat mechanism."""
-        from src.ev_charger_proxy.ocpp_service_manager import OCPPServiceClient
+        from src.ocpp_proxy.ocpp_service_manager import OCPPServiceClient
         
         # Mock WebSocket connection
         mock_ws = Mock()

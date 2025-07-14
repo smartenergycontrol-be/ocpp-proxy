@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="ocpp-proxy",
     version="0.1.0",
-    description="OCPP 1.6 JSON WebSocket proxy for EV charger sharing",
+    description="OCPP 1.6 & 2.0.1 JSON WebSocket proxy for EV charger sharing",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires=">=3.9",
@@ -25,7 +25,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "ocpp-proxy=ev_charger_proxy.main:main",
+            "ocpp-proxy=ocpp_proxy.main:main",
         ],
     },
 )

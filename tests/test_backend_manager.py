@@ -4,8 +4,8 @@ import datetime
 from unittest.mock import Mock, AsyncMock, patch
 from aiohttp import web
 
-from src.ev_charger_proxy.backend_manager import BackendManager
-from src.ev_charger_proxy.config import Config
+from src.ocpp_proxy.backend_manager import BackendManager
+from src.ocpp_proxy.config import Config
 
 
 class TestBackendManager:

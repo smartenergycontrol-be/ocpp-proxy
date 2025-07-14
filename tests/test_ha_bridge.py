@@ -4,7 +4,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from aiohttp import ClientSession, ClientWebSocketResponse
 from aioresponses import aioresponses
 
-from src.ev_charger_proxy.ha_bridge import HABridge
+from src.ocpp_proxy.ha_bridge import HABridge
 
 
 class TestHABridge:

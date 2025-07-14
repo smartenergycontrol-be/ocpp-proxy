@@ -4,7 +4,7 @@ import os
 from unittest.mock import patch
 import yaml
 
-from src.ev_charger_proxy.config import Config
+from src.ocpp_proxy.config import Config
 
 
 class TestConfig:

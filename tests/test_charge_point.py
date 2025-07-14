@@ -4,9 +4,9 @@ import datetime
 from unittest.mock import Mock, AsyncMock, patch
 from aiohttp import web
 
-from src.ev_charger_proxy.charge_point_v16 import ChargePointV16
-from src.ev_charger_proxy.charge_point_v201 import ChargePointV201
-from src.ev_charger_proxy.charge_point_factory import ChargePointFactory
+from src.ocpp_proxy.charge_point_v16 import ChargePointV16
+from src.ocpp_proxy.charge_point_v201 import ChargePointV201
+from src.ocpp_proxy.charge_point_factory import ChargePointFactory
 from ocpp.v16.enums import RegistrationStatus, AuthorizationStatus
 from ocpp.v201.enums import RegistrationStatusEnumType, AuthorizationStatusEnumType
 

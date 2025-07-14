@@ -5,8 +5,8 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import websockets
 from ocpp.v16.enums import RegistrationStatus, AuthorizationStatus
 
-from src.ev_charger_proxy.ocpp_service_manager import OCPPServiceClient, OCPPServiceManager
-from src.ev_charger_proxy.config import Config
+from src.ocpp_proxy.ocpp_service_manager import OCPPServiceClient, OCPPServiceManager
+from src.ocpp_proxy.config import Config
 
 
 class TestOCPPServiceClient:
@@ -383,7 +383,7 @@ class TestOCPPServiceManager:
             'token': 'test_token'
         }
         
-        with patch('src.ev_charger_proxy.ocpp_service_manager.websockets.connect', new_callable=AsyncMock) as mock_connect:
+        with patch('src.ocpp_proxy.ocpp_service_manager.websockets.connect', new_callable=AsyncMock) as mock_connect:
             mock_connection = Mock()
             mock_connect.return_value = mock_connection
             
@@ -412,7 +412,7 @@ class TestOCPPServiceManager:
             'password': 'testpass'
         }
         
-        with patch('src.ev_charger_proxy.ocpp_service_manager.websockets.connect') as mock_connect:
+        with patch('src.ocpp_proxy.ocpp_service_manager.websockets.connect') as mock_connect:
             mock_connection = Mock()
             mock_connect.return_value = mock_connection
             
@@ -433,7 +433,7 @@ class TestOCPPServiceManager:
             'auth_type': 'none'
         }
         
-        with patch('src.ev_charger_proxy.ocpp_service_manager.websockets.connect') as mock_connect:
+        with patch('src.ocpp_proxy.ocpp_service_manager.websockets.connect') as mock_connect:
             mock_connection = Mock()
             mock_connect.return_value = mock_connection
             
@@ -467,7 +467,7 @@ class TestOCPPServiceManager:
             'auth_type': 'none'
         }
         
-        with patch('src.ev_charger_proxy.ocpp_service_manager.websockets.connect') as mock_connect:
+        with patch('src.ocpp_proxy.ocpp_service_manager.websockets.connect') as mock_connect:
             mock_connect.side_effect = Exception("Connection failed")
             
             # Should not raise exception

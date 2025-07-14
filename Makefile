@@ -59,10 +59,10 @@ test-coverage:
 	python run_tests.py --coverage-html
 
 test-quick:
-	pytest tests/ -m "unit" --cov=src/ev_charger_proxy --cov-report=term-missing -v
+	pytest tests/ -m "unit" --cov=src/ocpp_proxy --cov-report=term-missing -v
 
 test-all:
-	pytest tests/ --cov=src/ev_charger_proxy --cov-report=term-missing --cov-report=html:htmlcov -v
+	pytest tests/ --cov=src/ocpp_proxy --cov-report=term-missing --cov-report=html:htmlcov -v
 
 # Code quality targets (placeholders for when tools are configured)
 lint:
@@ -79,7 +79,7 @@ check: lint
 
 # Development targets
 run:
-	cd src && python -m ev_charger_proxy.main
+	cd src && python -m ocpp_proxy.main
 
 clean:
 	find . -type f -name "*.pyc" -delete

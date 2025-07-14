@@ -155,7 +155,7 @@ def main():
     # Add coverage options
     if not args.no_coverage:
         cmd.extend([
-            "--cov=src/ev_charger_proxy",
+            "--cov=src/ocpp_proxy",
             "--cov-report=term-missing"
         ])
         
@@ -215,7 +215,7 @@ def run_specific_test_suites():
     quick_success = run_command([
         sys.executable, "-m", "pytest", 
         "-m", "unit", 
-        "--cov=src/ev_charger_proxy",
+        "--cov=src/ocpp_proxy",
         "--cov-report=term-missing",
         "tests/"
     ], "Quick test suite")
@@ -227,7 +227,7 @@ def run_specific_test_suites():
     print("\n2. Full Test Suite (All Tests)")
     full_success = run_command([
         sys.executable, "-m", "pytest", 
-        "--cov=src/ev_charger_proxy",
+        "--cov=src/ocpp_proxy",
         "--cov-report=term-missing",
         "--cov-report=html:htmlcov",
         "tests/"
