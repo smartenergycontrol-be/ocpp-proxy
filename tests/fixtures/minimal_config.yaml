@@ -1,0 +1,4 @@
+# Minimal test configuration
+allow_shared_charging: false
+rate_limit_seconds: 10
+ocpp_services: []

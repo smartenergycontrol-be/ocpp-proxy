@@ -1,0 +1,26 @@
+# Standalone configuration for OCPP Proxy
+allow_shared_charging: true
+preferred_provider: ''
+disallowed_providers: []
+allowed_providers: []
+presence_sensor: ''
+override_input_boolean: ''
+rate_limit_seconds: 10
+
+# OCPP service configurations for outbound connections
+ocpp_services:
+  - id: 'charging_network_1'
+    url: 'wss://api.charging-network.com/ocpp/CP001'
+    auth_type: 'token'
+    token: 'your-api-token-here'
+    enabled: true
+  - id: 'energy_provider_1'
+    url: 'wss://ocpp.energy-provider.com/chargepoint/123'
+    auth_type: 'basic'
+    username: 'your-username'
+    password: 'your-password'
+    enabled: true
+  - id: 'fleet_management'
+    url: 'wss://fleet.example.com/ocpp/cp/ABC123'
+    auth_type: 'none'
+    enabled: false

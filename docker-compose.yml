@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  ocpp_proxy:
+    build: .
+    environment:
+      - HA_URL=http://homeassistant.local:8123
+      - HA_TOKEN=YOUR_LONG_LIVED_ACCESS_TOKEN
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./config:/config
