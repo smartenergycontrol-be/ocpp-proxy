@@ -36,33 +36,32 @@ help:
 
 # Installation targets
 install:
-	pip install -r requirements.txt
+	poetry install --only=main
 
 install-dev:
-	pip install -r requirements.txt
-	pip install -e .
+	poetry install
 
 # Testing targets
 test:
-	python run_tests.py
+	poetry run python run_tests.py
 
 test-unit:
-	python run_tests.py --unit
+	poetry run python run_tests.py --unit
 
 test-integration:
-	python run_tests.py --integration
+	poetry run python run_tests.py --integration
 
 test-e2e:
-	python run_tests.py --e2e
+	poetry run python run_tests.py --e2e
 
 test-coverage:
-	python run_tests.py --coverage-html
+	poetry run python run_tests.py --coverage-html
 
 test-quick:
-	pytest tests/ -m "unit" --cov=src/ocpp_proxy --cov-report=term-missing -v
+	poetry run pytest tests/ -m "unit" --cov=src/ocpp_proxy --cov-report=term-missing -v
 
 test-all:
-	pytest tests/ --cov=src/ocpp_proxy --cov-report=term-missing --cov-report=html:htmlcov -v
+	poetry run pytest tests/ --cov=src/ocpp_proxy --cov-report=term-missing --cov-report=html:htmlcov -v
 
 # Code quality targets (placeholders for when tools are configured)
 lint:
@@ -75,11 +74,11 @@ format:
 
 check: lint
 	@echo "Running all quality checks..."
-	python run_tests.py --unit
+	poetry run python run_tests.py --unit
 
 # Development targets
 run:
-	cd src && python -m ocpp_proxy.main
+	poetry run python -m ocpp_proxy.main
 
 clean:
 	find . -type f -name "*.pyc" -delete
@@ -90,6 +89,7 @@ clean:
 	rm -rf .pytest_cache/
 	rm -rf build/
 	rm -rf dist/
+	rm -rf poetry.lock
 
 # Docker targets
 docker-build:
@@ -130,7 +130,8 @@ ci:
 # Development setup
 dev-setup:
 	@echo "Setting up development environment..."
-	pip install --upgrade pip
-	make install
+	@echo "Installing Poetry if not already available..."
+	@which poetry || curl -sSL https://install.python-poetry.org | python3 -
+	poetry install
 	@echo "Development environment ready!"
 	@echo "Run 'make test' to verify everything works."
