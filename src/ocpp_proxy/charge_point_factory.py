@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from .charge_point_base import ChargePointBase
 from .charge_point_v16 import ChargePointV16
@@ -13,11 +14,11 @@ class ChargePointFactory:
     @staticmethod
     def create_charge_point(
         cp_id: str,
-        connection,
+        connection: Any,
         version: str | None = None,
-        manager=None,
-        ha_bridge=None,
-        event_logger=None,
+        manager: Any = None,
+        ha_bridge: Any = None,
+        event_logger: Any = None,
         auto_detect: bool = True,
     ) -> ChargePointBase:
         """
@@ -60,7 +61,7 @@ class ChargePointFactory:
         raise ValueError(f"Unsupported OCPP version: {version}")
 
     @staticmethod
-    def _detect_version(connection) -> str | None:
+    def _detect_version(connection: Any) -> str | None:
         """
         Attempt to detect OCPP version from WebSocket connection.
 
@@ -155,7 +156,7 @@ class ChargePointFactory:
         return None
 
     @staticmethod
-    def get_supported_versions() -> list:
+    def get_supported_versions() -> list[str]:
         """Return list of supported OCPP versions."""
         return ["1.6", "2.0.1"]
 
@@ -170,7 +171,7 @@ class OCPPServiceFactory:
 
     @staticmethod
     def create_service_client(
-        service_id: str, connection, version: str, manager=None
+        service_id: str, connection: Any, version: str, manager: Any = None
     ) -> ChargePointBase:
         """
         Create an OCPP service client for outbound connections.

@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+from typing import Any
 
 
 class EventLogger:
@@ -34,12 +35,18 @@ class EventLogger:
         cursor.execute(
             "INSERT INTO sessions (timestamp, backend_id, duration_s, energy_kwh, revenue) "
             "VALUES (?, ?, ?, ?, ?)",
-            (datetime.datetime.utcnow().isoformat(), backend_id, duration_s, energy_kwh, revenue),
+            (
+                datetime.datetime.now(datetime.UTC).isoformat(),
+                backend_id,
+                duration_s,
+                energy_kwh,
+                revenue,
+            ),
         )
         conn.commit()
         conn.close()
 
-    def get_sessions(self) -> list:
+    def get_sessions(self) -> list[dict[str, Any]]:
         """Fetch all logged sessions as list of dicts."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()

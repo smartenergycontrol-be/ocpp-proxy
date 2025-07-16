@@ -29,22 +29,25 @@ class Config:
         return str(self._cfg.get("preferred_provider", ""))
 
     @property
-    def blocked_providers(self) -> list:
+    def blocked_providers(self) -> list[str]:
         """Return list of provider IDs that are always blocked."""
         # Support both old and new terminology for backward compatibility
         value = self._cfg.get("blocked_providers", self._cfg.get("disallowed_providers", []))
         return list(value) if value is not None else []
 
     @property
-    def allowed_providers(self) -> list:
+    def allowed_providers(self) -> list[str]:
         """Return allowlist of provider IDs; empty means no restrictions."""
         value = self._cfg.get("allowed_providers", [])
         return list(value) if value is not None else []
 
     # Backward compatibility properties
     @property
-    def disallowed_providers(self) -> list:
-        """Return list of provider IDs that are always blocked. (deprecated: use blocked_providers)"""
+    def disallowed_providers(self) -> list[str]:
+        """Return list of provider IDs that are always blocked.
+        
+        (deprecated: use blocked_providers)
+        """
         return self.blocked_providers
 
     @property
@@ -63,7 +66,7 @@ class Config:
         return int(self._cfg.get("rate_limit_seconds", 10))
 
     @property
-    def ocpp_services(self) -> list:
+    def ocpp_services(self) -> list[dict[str, str]]:
         """Return list of OCPP service configurations for outbound connections."""
         value = self._cfg.get("ocpp_services", [])
         return list(value) if value is not None else []

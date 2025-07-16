@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from aiohttp import ClientSession, ClientWebSocketResponse
 
@@ -10,11 +11,11 @@ class HABridge:
     Communicate with Home Assistant API for states, services, and notifications.
     """
 
-    def __init__(self, url: str, token: str):
+    def __init__(self, url: str, token: str) -> None:
         self._url = url.rstrip("/")
         self._token = token
-        self._session: ClientSession = None
-        self._ws: ClientWebSocketResponse = None
+        self._session: ClientSession | None = None
+        self._ws: ClientWebSocketResponse | None = None
 
     async def _ensure_session(self) -> ClientSession:
         """Ensure the session exists, creating it if needed."""
@@ -37,7 +38,7 @@ class HABridge:
             _LOGGER.error("HA authentication failed: %s", auth_ok)
             raise RuntimeError("Home Assistant authentication failed")
 
-    async def send_notification(self, title: str, message: str) -> dict:
+    async def send_notification(self, title: str, message: str) -> dict[str, Any]:
         """Send a persistent notification via Home Assistant."""
         url = f"{self._url}/api/services/persistent_notification/create"
         data = {"title": title, "message": message}
@@ -45,14 +46,16 @@ class HABridge:
         async with session.post(
             url, json=data, headers={"Authorization": f"Bearer {self._token}"}
         ) as resp:
-            return await resp.json()
+            result = await resp.json()
+            return dict(result) if result is not None else {}
 
-    async def get_state(self, entity_id: str) -> dict:
+    async def get_state(self, entity_id: str) -> dict[str, Any]:
         """Retrieve state of a given entity from Home Assistant."""
         url = f"{self._url}/api/states/{entity_id}"
         session = await self._ensure_session()
         async with session.get(url, headers={"Authorization": f"Bearer {self._token}"}) as resp:
-            return await resp.json()
+            result = await resp.json()
+            return dict(result) if result is not None else {}
 
     async def close(self) -> None:
         """Close HA WebSocket and HTTP sessions."""

@@ -1,8 +1,13 @@
 import asyncio
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import websockets
+
+if TYPE_CHECKING:
+    from websockets.typing import Subprotocol
+else:
+    Subprotocol = str
 
 from .charge_point_factory import OCPPServiceFactory
 
@@ -16,13 +21,14 @@ class OCPPServiceManager:
     Supports both OCPP 1.6 and 2.0.1 versions.
     """
 
-    def __init__(self, config, backend_manager=None):
+    def __init__(self, config: Any, backend_manager: Any = None) -> None:
         self.config = config
         self.backend_manager = backend_manager
         self.services: dict[str, Any] = {}
-        self._connection_tasks: dict[str, asyncio.Task] = {}
+        self._connection_tasks: dict[str, asyncio.Task[Any]] = {}
+        self._background_tasks: set[asyncio.Task[Any]] = set()
 
-    async def start_services(self):
+    async def start_services(self) -> None:
         """Start connections to all configured OCPP services."""
         if not hasattr(self.config, "ocpp_services"):
             _LOGGER.info("No OCPP services configured")
@@ -33,7 +39,7 @@ class OCPPServiceManager:
             if service_id and service_config.get("enabled", True):
                 await self.connect_service(service_id, service_config)
 
-    async def connect_service(self, service_id: str, service_config: dict):
+    async def connect_service(self, service_id: str, service_config: dict[str, Any]) -> None:
         """Connect to a specific OCPP service."""
         try:
             url = service_config.get("url")
@@ -60,11 +66,11 @@ class OCPPServiceManager:
                     auth_headers["Authorization"] = f"Bearer {token}"
 
             # Set WebSocket subprotocol based on version
-            subprotocols = []
+            subprotocols: list[Subprotocol] = []
             if version == "1.6":
-                subprotocols = ["ocpp1.6"]
+                subprotocols = [cast("Subprotocol", "ocpp1.6")]
             elif version == "2.0.1":
-                subprotocols = ["ocpp2.0.1"]
+                subprotocols = [cast("Subprotocol", "ocpp2.0.1")]
 
             # Create WebSocket connection
             connection = await websockets.connect(
@@ -87,10 +93,10 @@ class OCPPServiceManager:
 
             _LOGGER.info(f"Connecting to OCPP {version} service {service_id} at {url}")
 
-        except Exception as e:
-            _LOGGER.exception(f"Failed to connect to OCPP service {service_id}: {e}")
+        except Exception:
+            _LOGGER.exception(f"Failed to connect to OCPP service {service_id}")
 
-    async def disconnect_service(self, service_id: str):
+    async def disconnect_service(self, service_id: str) -> None:
         """Disconnect from a specific OCPP service."""
         if service_id in self.services:
             client = self.services[service_id]
@@ -108,7 +114,7 @@ class OCPPServiceManager:
             _LOGGER.info(f"Disconnected from OCPP service {service_id}")
 
     async def request_control_from_service(
-        self, service_id: str, action: str, params: dict
+        self, service_id: str, action: str, params: dict[str, Any]
     ) -> bool:
         """Handle control request from an OCPP service."""
         if not self.backend_manager:
@@ -123,25 +129,30 @@ class OCPPServiceManager:
             if cp:
                 try:
                     if action == "RemoteStartTransaction":
-                        return await cp.send_remote_start_transaction(
+                        result = await cp.send_remote_start_transaction(
                             connector_id=params.get("connector_id", 1), id_tag=params.get("id_tag")
                         )
+                        return bool(result)
                     if action == "RemoteStopTransaction":
-                        return await cp.send_remote_stop_transaction(
+                        result = await cp.send_remote_stop_transaction(
                             transaction_id=params.get("transaction_id")
                         )
-                except Exception as e:
-                    _LOGGER.exception(f"Error forwarding {action} from service {service_id}: {e}")
+                        return bool(result)
+                except Exception:
+                    _LOGGER.exception(f"Error forwarding {action} from service {service_id}")
 
         return False
 
-    def broadcast_event_to_services(self, event: dict):
+    def broadcast_event_to_services(self, event: dict[str, Any]) -> None:
         """Broadcast charger events to all connected OCPP services."""
         for client in self.services.values():
             if hasattr(client, "connected") and client.connected:
-                asyncio.create_task(self._send_event_to_service(client, event))
+                task = asyncio.create_task(self._send_event_to_service(client, event))
+                # Store reference to prevent task being garbage collected
+                self._background_tasks.add(task)
+                task.add_done_callback(self._background_tasks.discard)
 
-    async def _send_event_to_service(self, client: Any, event: dict):
+    async def _send_event_to_service(self, client: Any, event: dict[str, Any]) -> None:
         """Send a specific event to an OCPP service."""
         try:
             event_type = event.get("type")
@@ -164,17 +175,17 @@ class OCPPServiceManager:
                 # Services receive boot notifications passively
                 pass
 
-        except Exception as e:
+        except Exception:
             _LOGGER.exception(
-                f"Error sending event to service {getattr(client, 'service_id', 'unknown')}: {e}"
+                f"Error sending event to service {getattr(client, 'service_id', 'unknown')}"
             )
 
-    async def stop_all_services(self):
+    async def stop_all_services(self) -> None:
         """Stop all OCPP service connections."""
         for service_id in list(self.services.keys()):
             await self.disconnect_service(service_id)
 
-    def get_service_status(self) -> dict:
+    def get_service_status(self) -> dict[str, dict[str, Any]]:
         """Get status of all OCPP services."""
         status = {}
         for service_id, client in self.services.items():

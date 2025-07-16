@@ -83,7 +83,7 @@ async def status_handler(request: web.Request) -> web.Response:
     return web.json_response(status)
 
 
-async def welcome_handler(request: web.Request) -> web.Response:
+async def welcome_handler(_request: web.Request) -> web.Response:
     """Serve a simple welcome page for browser access."""
     html_content = """\
 <!DOCTYPE html>
@@ -111,11 +111,20 @@ async def welcome_handler(request: web.Request) -> web.Response:
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item"><a href="/charger">/charger</a> (WebSocket for charger)</li>
-        <li class="list-group-item"><a href="/backend?id=your_backend_id">/backend?id=your_backend_id</a> (WebSocket for backend)</li>
+        <li class="list-group-item">
+          <a href="/backend?id=your_backend_id">/backend?id=your_backend_id</a>
+          (WebSocket for backend)
+        </li>
         <li class="list-group-item"><a href="/sessions">/sessions</a> (JSON session data)</li>
-        <li class="list-group-item"><a href="/sessions.csv">/sessions.csv</a> (CSV session data)</li>
-        <li class="list-group-item"><a href="/status">/status</a> (backend status and control owner)</li>
-        <li class="list-group-item"><a href="/override">/override</a> (POST to override control owner)</li>
+        <li class="list-group-item">
+          <a href="/sessions.csv">/sessions.csv</a> (CSV session data)
+        </li>
+        <li class="list-group-item">
+          <a href="/status">/status</a> (backend status and control owner)
+        </li>
+        <li class="list-group-item">
+          <a href="/override">/override</a> (POST to override control owner)
+        </li>
       </ul>
     </div>
   </div>
@@ -203,7 +212,7 @@ async def init_app() -> web.Application:
     return app
 
 
-async def cleanup_app(app):
+async def cleanup_app(app: web.Application) -> None:
     """Cleanup function to properly close OCPP service connections."""
     if "ocpp_service_manager" in app:
         await app["ocpp_service_manager"].stop_all_services()
