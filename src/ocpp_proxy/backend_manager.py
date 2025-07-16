@@ -63,15 +63,23 @@ class BackendManager:
 
         # HA override boolean (must be ON to allow shared)
         if self.ha and self.config.override_input_boolean:
-            state = await self.ha.get_state(self.config.override_input_boolean)
-            if state.get('state') != 'on':
-                return False
+            try:
+                state = await self.ha.get_state(self.config.override_input_boolean)
+                if state.get('state') != 'on':
+                    return False
+            except Exception:
+                # Fail-safe: allow control if HA is unavailable
+                pass
 
         # Presence sensor (block if someone is home)
         if self.ha and self.config.presence_sensor:
-            state = await self.ha.get_state(self.config.presence_sensor)
-            if state.get('state') == 'home':
-                return False
+            try:
+                state = await self.ha.get_state(self.config.presence_sensor)
+                if state.get('state') == 'home':
+                    return False
+            except Exception:
+                # Fail-safe: allow control if HA is unavailable
+                pass
 
         # Provider whitelist/blacklist (skip for OCPP services)
         if not backend_id.startswith('ocpp_service_'):

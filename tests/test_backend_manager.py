@@ -199,7 +199,8 @@ class TestBackendManager:
         result = await backend_manager.request_control('test_backend')
         assert result == False
         
-        # Mock HA returning 'on' state
+        # Clear rate limit cache and mock HA returning 'on' state
+        backend_manager._last_request_time.clear()
         backend_manager.ha.get_state.return_value = {'state': 'on'}
         result = await backend_manager.request_control('test_backend')
         assert result == True
@@ -215,7 +216,8 @@ class TestBackendManager:
         result = await backend_manager.request_control('test_backend')
         assert result == False
         
-        # Mock presence sensor returning 'away'
+        # Clear rate limit cache and mock presence sensor returning 'away'
+        backend_manager._last_request_time.clear()
         backend_manager.ha.get_state.return_value = {'state': 'away'}
         result = await backend_manager.request_control('test_backend')
         assert result == True
