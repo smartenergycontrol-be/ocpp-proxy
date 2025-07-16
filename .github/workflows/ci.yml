@@ -44,7 +44,7 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        poetry run python run_tests.py --coverage
+        make test-coverage
 
     - name: Upload coverage reports to Codecov
       if: matrix.python-version == '3.11'
@@ -71,23 +71,15 @@ jobs:
 
     - name: Check code formatting (if configured)
       run: |
-        if poetry run which black >/dev/null 2>&1; then
-          poetry run black --check src/ tests/
-        fi
+        make format-check
 
     - name: Run linting (if configured)
       run: |
-        if poetry run which ruff >/dev/null 2>&1; then
-          poetry run ruff check src/ tests/
-        elif poetry run which flake8 >/dev/null 2>&1; then
-          poetry run flake8 src/ tests/
-        fi
+        make lint
 
     - name: Type checking (if configured)
       run: |
-        if poetry run which mypy >/dev/null 2>&1; then
-          poetry run mypy src/
-        fi
+        make type-check
 
   security:
     runs-on: ubuntu-latest
