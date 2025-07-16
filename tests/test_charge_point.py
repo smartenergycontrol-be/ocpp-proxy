@@ -67,6 +67,18 @@ class TestChargePoint:
             event_logger=mock_event_logger
         )
 
+    @pytest.fixture
+    def charge_point(self, mock_connection, mock_manager, mock_ha_bridge, mock_event_logger):
+        """Create a ChargePoint V1.6 instance for testing (generic fixture)."""
+        return ChargePointV16(
+            'CP-1',
+            mock_connection,
+            mock_manager,
+            mock_ha_bridge,
+            mock_event_logger
+        )
+
+    @pytest.mark.unit
     def test_initialization_v16(self, charge_point_v16, mock_connection, mock_manager, mock_ha_bridge, mock_event_logger):
         """Test ChargePoint V1.6 initialization."""
         assert charge_point_v16.cp_id == 'CP-1'
@@ -77,6 +89,7 @@ class TestChargePoint:
         assert charge_point_v16._tx_counter == 0
         assert charge_point_v16.ocpp_version == '1.6'
 
+    @pytest.mark.unit
     def test_initialization_v201(self, charge_point_v201, mock_connection, mock_manager, mock_ha_bridge, mock_event_logger):
         """Test ChargePoint V2.0.1 initialization."""
         assert charge_point_v201.cp_id == 'CP-1'
@@ -87,6 +100,7 @@ class TestChargePoint:
         assert charge_point_v201._tx_counter == 0
         assert charge_point_v201.ocpp_version == '2.0.1'
 
+    @pytest.mark.unit
     def test_factory_create_v16(self, mock_connection, mock_manager, mock_ha_bridge, mock_event_logger):
         """Test factory creates OCPP 1.6 ChargePoint."""
         cp = ChargePointFactory.create_charge_point(
@@ -96,6 +110,7 @@ class TestChargePoint:
         assert isinstance(cp, ChargePointV16)
         assert cp.ocpp_version == '1.6'
 
+    @pytest.mark.unit
     def test_factory_create_v201(self, mock_connection, mock_manager, mock_ha_bridge, mock_event_logger):
         """Test factory creates OCPP 2.0.1 ChargePoint."""
         cp = ChargePointFactory.create_charge_point(
@@ -105,17 +120,20 @@ class TestChargePoint:
         assert isinstance(cp, ChargePointV201)
         assert cp.ocpp_version == '2.0.1'
 
+    @pytest.mark.unit
     def test_factory_unsupported_version(self, mock_connection):
         """Test factory raises error for unsupported version."""
         with pytest.raises(ValueError, match="Unsupported OCPP version"):
             ChargePointFactory.create_charge_point('CP-1', mock_connection, version='3.0')
 
+    @pytest.mark.unit
     def test_factory_default_version(self, mock_connection):
         """Test factory defaults to 1.6 when no version specified."""
         cp = ChargePointFactory.create_charge_point('CP-1', mock_connection, auto_detect=False)
         assert isinstance(cp, ChargePointV16)
         assert cp.ocpp_version == '1.6'
 
+    @pytest.mark.unit
     def test_factory_version_detection(self, mock_connection):
         """Test factory version detection."""
         # Mock connection with subprotocol
@@ -123,18 +141,21 @@ class TestChargePoint:
         cp = ChargePointFactory.create_charge_point('CP-1', mock_connection, auto_detect=True)
         assert isinstance(cp, ChargePointV16)
 
+    @pytest.mark.unit
     def test_factory_supported_versions(self):
         """Test factory returns supported versions."""
         versions = ChargePointFactory.get_supported_versions()
         assert '1.6' in versions
         assert '2.0.1' in versions
 
+    @pytest.mark.unit
     def test_factory_version_supported(self):
         """Test factory version support check."""
         assert ChargePointFactory.is_version_supported('1.6')
         assert ChargePointFactory.is_version_supported('2.0.1')
         assert not ChargePointFactory.is_version_supported('3.0')
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_boot_notification_v16(self, charge_point_v16):
         """Test handling BootNotification from charger."""
@@ -155,6 +176,7 @@ class TestChargePoint:
         assert result.status == RegistrationStatus.accepted
         assert result.interval == 10
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_boot_notification_v201(self, charge_point_v201):
         """Test handling BootNotification from charger V2.0.1."""
@@ -174,6 +196,7 @@ class TestChargePoint:
         assert result.status == RegistrationStatusEnumType.accepted
         assert result.interval == 10
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_boot_notification_no_manager(self, mock_connection):
         """Test BootNotification without manager."""
@@ -187,6 +210,7 @@ class TestChargePoint:
         # Should still return accepted status
         assert result.status == RegistrationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_heartbeat_v16(self, charge_point_v16):
         """Test handling Heartbeat from charger V1.6."""
@@ -201,6 +225,7 @@ class TestChargePoint:
         # Should return current time
         assert result.current_time is not None
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_heartbeat_v201(self, charge_point_v201):
         """Test handling Heartbeat from charger V2.0.1."""
@@ -215,6 +240,7 @@ class TestChargePoint:
         # Should return current time
         assert result.current_time is not None
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_status_notification_normal_v16(self, charge_point_v16):
         """Test handling normal StatusNotification V1.6."""
@@ -225,17 +251,18 @@ class TestChargePoint:
         )
         
         # Should broadcast event
-        charge_point.manager.broadcast_event.assert_called_once()
-        call_args = charge_point.manager.broadcast_event.call_args[0][0]
+        charge_point_v16.manager.broadcast_event.assert_called_once()
+        call_args = charge_point_v16.manager.broadcast_event.call_args[0][0]
         assert call_args['type'] == 'status'
         assert call_args['connector_id'] == 1
         assert call_args['error_code'] == 'NoError'
         assert call_args['status'] == 'Available'
         
         # Should not release control or send notification
-        charge_point.manager.release_control.assert_not_called()
-        charge_point.ha_bridge.send_notification.assert_not_called()
+        charge_point_v16.manager.release_control.assert_not_called()
+        charge_point_v16.ha_bridge.send_notification.assert_not_called()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_status_notification_faulted(self, charge_point):
         """Test handling faulted StatusNotification."""
@@ -258,6 +285,7 @@ class TestChargePoint:
         assert 'Status=Faulted' in call_args[1]
         assert 'Error=ConnectorLockFailure' in call_args[1]
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_status_notification_unavailable(self, charge_point):
         """Test handling unavailable StatusNotification."""
@@ -271,6 +299,7 @@ class TestChargePoint:
         charge_point.manager.release_control.assert_called_once()
         charge_point.ha_bridge.send_notification.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_status_notification_no_ha_bridge(self, mock_connection, mock_manager):
         """Test StatusNotification without HA bridge."""
@@ -285,6 +314,7 @@ class TestChargePoint:
         # Should still release control
         mock_manager.release_control.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_meter_values(self, charge_point):
         """Test handling MeterValues from charger."""
@@ -309,6 +339,7 @@ class TestChargePoint:
         assert call_args['connector_id'] == 1
         assert call_args['values'] == meter_values
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_start_transaction(self, charge_point):
         """Test handling StartTransaction from charger."""
@@ -342,6 +373,7 @@ class TestChargePoint:
         assert result.transaction_id == 1
         assert result.id_tag_info['status'] == AuthorizationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_start_transaction_multiple(self, charge_point):
         """Test handling multiple StartTransaction calls."""
@@ -365,6 +397,7 @@ class TestChargePoint:
         assert result2.transaction_id == 2
         assert len(charge_point._sessions) == 2
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_stop_transaction(self, charge_point):
         """Test handling StopTransaction from charger."""
@@ -383,8 +416,8 @@ class TestChargePoint:
             timestamp='2023-01-01T13:00:00Z'
         )
         
-        # Should broadcast event
-        charge_point.manager.broadcast_event.assert_called_once()
+        # Should broadcast event (called twice: start + stop)
+        assert charge_point.manager.broadcast_event.call_count == 2
         call_args = charge_point.manager.broadcast_event.call_args[0][0]
         assert call_args['type'] == 'transaction_stopped'
         assert call_args['transaction_id'] == 1
@@ -407,6 +440,7 @@ class TestChargePoint:
         # Should return accepted status
         assert result.id_tag_info['status'] == AuthorizationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_stop_transaction_unknown_id(self, charge_point):
         """Test handling StopTransaction for unknown transaction ID."""
@@ -425,6 +459,7 @@ class TestChargePoint:
         # Should still return accepted status
         assert result.id_tag_info['status'] == AuthorizationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_stop_transaction_no_manager(self, mock_connection, mock_event_logger):
         """Test StopTransaction without manager."""
@@ -442,6 +477,7 @@ class TestChargePoint:
         # Should still return accepted status
         assert result.id_tag_info['status'] == AuthorizationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_stop_transaction_invalid_timestamps(self, charge_point):
         """Test StopTransaction with invalid timestamp formats."""
@@ -465,6 +501,7 @@ class TestChargePoint:
         log_args = charge_point.event_logger.log_session.call_args[0]
         assert log_args[1] == 0.0  # duration should be 0
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_stop_transaction_no_event_logger(self, mock_connection, mock_manager):
         """Test StopTransaction without event logger."""
@@ -488,6 +525,7 @@ class TestChargePoint:
         # Should still return accepted status
         assert result.id_tag_info['status'] == AuthorizationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_on_stop_transaction_no_ha_bridge(self, mock_connection, mock_manager, mock_event_logger):
         """Test StopTransaction without HA bridge."""
@@ -514,6 +552,7 @@ class TestChargePoint:
         # Should return accepted status
         assert result.id_tag_info['status'] == AuthorizationStatus.accepted
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_start_method(self, charge_point):
         """Test the start method."""
@@ -535,6 +574,7 @@ class TestChargePoint:
             charge_point_vendor='OCPPProxy'
         )
 
+    @pytest.mark.unit
     def test_transaction_counter_increments(self, charge_point):
         """Test that transaction counter increments correctly."""
         assert charge_point._tx_counter == 0
@@ -546,6 +586,7 @@ class TestChargePoint:
         charge_point._tx_counter += 1
         assert charge_point._tx_counter == 2
 
+    @pytest.mark.unit
     def test_session_storage(self, charge_point):
         """Test session storage and retrieval."""
         session_data = {
@@ -566,6 +607,7 @@ class TestChargePoint:
         del charge_point._sessions[1]
         assert 1 not in charge_point._sessions
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_energy_calculation(self, charge_point):
         """Test energy calculation in stop transaction."""
@@ -589,6 +631,7 @@ class TestChargePoint:
         log_args = charge_point.event_logger.log_session.call_args[0]
         assert log_args[2] == 5.0  # energy in kWh
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_duration_calculation(self, charge_point):
         """Test duration calculation in stop transaction."""

@@ -10,6 +10,7 @@ from src.ocpp_proxy.config import Config
 class TestConfig:
     """Unit tests for Config class."""
 
+    @pytest.mark.unit
     def test_config_with_valid_yaml(self):
         """Test loading valid YAML configuration."""
         config_data = {
@@ -49,6 +50,7 @@ class TestConfig:
         finally:
             os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_with_missing_file(self):
         """Test config behavior when file doesn't exist."""
         config = Config('/nonexistent/path/config.yaml')
@@ -61,6 +63,7 @@ class TestConfig:
         assert config.rate_limit_seconds == 10
         assert config.ocpp_services == []
 
+    @pytest.mark.unit
     def test_config_with_empty_file(self):
         """Test config behavior with empty YAML file."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
@@ -80,6 +83,7 @@ class TestConfig:
         finally:
             os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_with_partial_data(self):
         """Test config with only some fields present."""
         config_data = {
@@ -104,6 +108,7 @@ class TestConfig:
         finally:
             os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_type_conversion(self):
         """Test that config values are properly converted to expected types."""
         config_data = {
@@ -130,6 +135,7 @@ class TestConfig:
         finally:
             os.unlink(config_path)
 
+    @pytest.mark.unit
     @patch.dict(os.environ, {'ADDON_CONFIG_FILE': '/custom/path/config.yaml'})
     def test_config_default_path_from_env(self):
         """Test that default path is loaded from environment variable."""
@@ -138,6 +144,7 @@ class TestConfig:
             # Should use default values when file doesn't exist
             assert config.allow_shared_charging == False
 
+    @pytest.mark.unit
     def test_config_ocpp_services_complex(self):
         """Test complex OCPP services configuration."""
         config_data = {
@@ -195,6 +202,7 @@ class TestConfig:
         finally:
             os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_boolean_values(self):
         """Test various boolean value representations."""
         test_cases = [
@@ -220,6 +228,7 @@ class TestConfig:
             finally:
                 os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_list_values(self):
         """Test various list value representations."""
         test_cases = [
@@ -241,6 +250,7 @@ class TestConfig:
             finally:
                 os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_string_values(self):
         """Test various string value representations."""
         test_cases = [
@@ -264,6 +274,7 @@ class TestConfig:
             finally:
                 os.unlink(config_path)
     
+    @pytest.mark.unit
     def test_config_string_none_value(self):
         """Test that None values are handled correctly in string fields."""
         config_data = {'preferred_provider': None}
@@ -279,6 +290,7 @@ class TestConfig:
         finally:
             os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_integer_values(self):
         """Test various integer value representations."""
         test_cases = [
@@ -302,6 +314,7 @@ class TestConfig:
             finally:
                 os.unlink(config_path)
 
+    @pytest.mark.unit
     def test_config_invalid_integer(self):
         """Test config behavior with invalid integer values."""
         config_data = {'rate_limit_seconds': 'invalid_number'}

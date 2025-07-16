@@ -16,7 +16,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
     """End-to-end tests for OCPP flows."""
 
     @pytest.fixture
-    def test_config(self):
+    def config_data(self):
         """Create test configuration."""
         return {
             'allow_shared_charging': True,
@@ -47,6 +47,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                 app = await init_app()
                 return app
 
+    @pytest.mark.e2e
     async def test_charger_boot_sequence(self):
         """Test complete charger boot sequence."""
         # Mock ChargePoint to capture boot sequence
@@ -72,6 +73,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                 # Verify charge point was stored in app
                 assert self.app['charge_point'] == mock_cp
 
+    @pytest.mark.e2e
     async def test_backend_subscription_and_control(self):
         """Test backend subscription and control flow."""
         # Mock backend manager
@@ -121,6 +123,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                         # Verify unsubscription
                         mock_unsubscribe.assert_called_once_with('test_backend')
 
+    @pytest.mark.e2e
     async def test_multiple_backend_control_arbitration(self):
         """Test control arbitration between multiple backends."""
         # Mock backend manager to simulate control arbitration
@@ -180,6 +183,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                                 id_tag='RFID123'
                             )
 
+    @pytest.mark.e2e
     async def test_charger_event_broadcasting(self):
         """Test that charger events are broadcast to all backends."""
         # Mock backend manager to capture broadcasted events
@@ -238,6 +242,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                     assert status_event['error_code'] == 'NoError'
                     assert status_event['status'] == 'Available'
 
+    @pytest.mark.e2e
     async def test_transaction_logging_flow(self):
         """Test complete transaction logging flow."""
         # Mock event logger to capture logged sessions
@@ -299,6 +304,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                 assert session['energy_kwh'] == 5.0     # 5000 Wh = 5 kWh
                 assert session['revenue'] == 0.0
 
+    @pytest.mark.e2e
     async def test_session_data_retrieval(self):
         """Test session data retrieval endpoints."""
         # Mock session data
@@ -341,6 +347,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             assert '2023-01-01T12:00:00Z,backend1,3600.0,25.0,5.0' in lines[1]
             assert '2023-01-01T13:00:00Z,backend2,1800.0,12.5,2.5' in lines[2]
 
+    @pytest.mark.e2e
     async def test_status_monitoring_flow(self):
         """Test status monitoring and override flow."""
         # Mock backend manager status
@@ -375,6 +382,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                     mock_release.assert_called_once()
                     mock_request.assert_called_once_with('backend2')
 
+    @pytest.mark.e2e
     async def test_fault_handling_flow(self):
         """Test fault handling and safety controls."""
         # Mock backend manager and HA bridge
@@ -412,6 +420,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                     assert 'Status=Faulted' in call_args[1]
                     assert 'Error=ConnectorLockFailure' in call_args[1]
 
+    @pytest.mark.e2e
     async def test_rate_limiting_flow(self):
         """Test rate limiting functionality."""
         # Mock backend manager with rate limiting
@@ -462,6 +471,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
                         # Verify rate limiting was applied
                         assert len(request_times) == 2
 
+    @pytest.mark.e2e
     async def test_ocpp_service_integration(self):
         """Test OCPP service integration flow."""
         # Mock OCPP service manager
@@ -499,6 +509,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
 class TestOCPPServiceFlows:
     """Test OCPP service specific flows."""
 
+    @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_ocpp_service_authentication_flow(self):
         """Test OCPP service authentication flows."""
@@ -561,6 +572,7 @@ class TestOCPPServiceFlows:
             # Check no auth header
             assert 'Authorization' not in auth_headers[2]
 
+    @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_ocpp_service_control_flow(self):
         """Test OCPP service control request flow."""
@@ -605,6 +617,7 @@ class TestOCPPServiceFlows:
         # Verify result
         assert result.status == 'Accepted'
 
+    @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_ocpp_service_event_forwarding(self):
         """Test event forwarding to OCPP services."""
@@ -653,6 +666,7 @@ class TestOCPPServiceFlows:
             error_code='NoError'
         )
 
+    @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_ocpp_service_heartbeat_flow(self):
         """Test OCPP service heartbeat mechanism."""

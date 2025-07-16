@@ -43,6 +43,7 @@ class TestMainApplication(AioHTTPTestCase):
                 app = await init_app()
                 return app
 
+    @pytest.mark.integration
     async def test_welcome_handler(self):
         """Test the welcome page handler."""
         request = await self.client.request('GET', '/')
@@ -55,6 +56,7 @@ class TestMainApplication(AioHTTPTestCase):
         assert '/sessions' in content
         assert '/status' in content
 
+    @pytest.mark.integration
     async def test_sessions_json_empty(self):
         """Test sessions JSON endpoint with no sessions."""
         with patch.object(self.app['event_logger'], 'get_sessions', return_value=[]):
@@ -64,6 +66,7 @@ class TestMainApplication(AioHTTPTestCase):
             data = await request.json()
             assert data == []
 
+    @pytest.mark.integration
     async def test_sessions_json_with_data(self):
         """Test sessions JSON endpoint with session data."""
         mock_sessions = [
@@ -83,6 +86,7 @@ class TestMainApplication(AioHTTPTestCase):
             data = await request.json()
             assert data == mock_sessions
 
+    @pytest.mark.integration
     async def test_sessions_csv_empty(self):
         """Test sessions CSV endpoint with no sessions."""
         with patch.object(self.app['event_logger'], 'get_sessions', return_value=[]):
@@ -97,6 +101,7 @@ class TestMainApplication(AioHTTPTestCase):
             header = lines[0].rstrip('\r')
             assert header == 'timestamp,backend_id,duration_s,energy_kwh,revenue'
 
+    @pytest.mark.integration
     async def test_sessions_csv_with_data(self):
         """Test sessions CSV endpoint with session data."""
         mock_sessions = [
@@ -122,6 +127,7 @@ class TestMainApplication(AioHTTPTestCase):
             assert header == 'timestamp,backend_id,duration_s,energy_kwh,revenue'
             assert data_line == '2023-01-01T12:00:00Z,test_backend,3600.0,25.0,5.0'
 
+    @pytest.mark.integration
     async def test_status_handler(self):
         """Test the status handler."""
         # Mock backend manager status
@@ -138,6 +144,7 @@ class TestMainApplication(AioHTTPTestCase):
             data = await request.json()
             assert data == mock_status
 
+    @pytest.mark.integration
     async def test_override_handler_success(self):
         """Test the override handler with successful override."""
         with patch.object(self.app['backend_manager'], 'release_control') as mock_release:
@@ -151,6 +158,7 @@ class TestMainApplication(AioHTTPTestCase):
                 mock_release.assert_called_once()
                 mock_request.assert_called_once_with('test_backend')
 
+    @pytest.mark.integration
     async def test_override_handler_failure(self):
         """Test the override handler with failed override."""
         with patch.object(self.app['backend_manager'], 'release_control') as mock_release:
@@ -164,11 +172,13 @@ class TestMainApplication(AioHTTPTestCase):
                 mock_release.assert_called_once()
                 mock_request.assert_called_once_with('test_backend')
 
+    @pytest.mark.integration
     async def test_override_handler_invalid_json(self):
         """Test the override handler with invalid JSON."""
         request = await self.client.request('POST', '/override', data='invalid json')
         assert request.status == 400
 
+    @pytest.mark.integration
     async def test_charger_handler_websocket(self):
         """Test the charger WebSocket handler."""
         # This is a complex test as it involves WebSocket connections
@@ -186,6 +196,7 @@ class TestMainApplication(AioHTTPTestCase):
                 # Close the connection
                 await ws.close()
 
+    @pytest.mark.integration
     async def test_backend_handler_websocket(self):
         """Test the backend WebSocket handler."""
         with patch.object(self.app['backend_manager'], 'subscribe') as mock_subscribe:
@@ -221,6 +232,7 @@ class TestMainApplication(AioHTTPTestCase):
                         assert mock_subscribe.call_args[0][0] == 'test_backend'
                         mock_request.assert_called_once_with('test_backend')
 
+    @pytest.mark.integration
     async def test_backend_handler_remote_stop_transaction(self):
         """Test backend handler remote stop transaction."""
         with patch.object(self.app['backend_manager'], 'subscribe'):
@@ -248,6 +260,7 @@ class TestMainApplication(AioHTTPTestCase):
                     assert response['action'] == 'RemoteStopTransaction'
                     assert response['result']['status'] == 'Accepted'
 
+    @pytest.mark.integration
     async def test_backend_handler_control_denied(self):
         """Test backend handler when control is denied."""
         with patch.object(self.app['backend_manager'], 'subscribe'):
@@ -271,6 +284,7 @@ class TestMainApplication(AioHTTPTestCase):
                         
                         assert response['error'] == 'control_locked'
 
+    @pytest.mark.integration
     async def test_backend_handler_unknown_action(self):
         """Test backend handler with unknown action."""
         with patch.object(self.app['backend_manager'], 'subscribe'):
@@ -288,6 +302,7 @@ class TestMainApplication(AioHTTPTestCase):
                     
                     assert response['error'] == 'unknown_action'
 
+    @pytest.mark.integration
     async def test_backend_handler_no_charge_point(self):
         """Test backend handler when no charge point is connected."""
         with patch.object(self.app['backend_manager'], 'subscribe'):
@@ -310,6 +325,7 @@ class TestMainApplication(AioHTTPTestCase):
                         
                         assert response['error'] == 'unknown_action'
 
+    @pytest.mark.integration
     async def test_backend_handler_default_id(self):
         """Test backend handler with default backend ID."""
         with patch.object(self.app['backend_manager'], 'subscribe') as mock_subscribe:
@@ -344,6 +360,7 @@ class TestMainApplicationHandlers:
         }
         return components
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_welcome_handler_unit(self, mock_request):
         """Unit test for welcome handler."""
@@ -360,6 +377,7 @@ class TestMainApplicationHandlers:
         assert '/sessions' in html_content
         assert '/status' in html_content
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_sessions_json_unit(self, mock_request, mock_app_components):
         """Unit test for sessions JSON handler."""
@@ -372,6 +390,7 @@ class TestMainApplicationHandlers:
         assert response.status == 200
         assert response.content_type == 'application/json'
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_sessions_csv_unit(self, mock_request, mock_app_components):
         """Unit test for sessions CSV handler."""
@@ -399,6 +418,7 @@ class TestMainApplicationHandlers:
         assert 'timestamp,backend_id,duration_s,energy_kwh,revenue' in lines[0]
         assert '2023-01-01T12:00:00Z,test_backend,3600.0,25.0,5.0' in lines[1]
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_status_handler_unit(self, mock_request, mock_app_components):
         """Unit test for status handler."""
@@ -415,6 +435,7 @@ class TestMainApplicationHandlers:
         assert response.status == 200
         assert response.content_type == 'application/json'
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_override_handler_unit(self, mock_request, mock_app_components):
         """Unit test for override handler."""
@@ -433,6 +454,7 @@ class TestMainApplicationHandlers:
         mock_manager.release_control.assert_called_once()
         mock_manager.request_control.assert_called_once_with('test_backend')
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_cleanup_app_unit(self, mock_app_components):
         """Unit test for cleanup_app function."""
@@ -443,6 +465,7 @@ class TestMainApplicationHandlers:
         
         mock_app_components['ocpp_service_manager'].stop_all_services.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_cleanup_app_no_ocpp_manager(self):
         """Unit test for cleanup_app without OCPP service manager."""
@@ -455,6 +478,7 @@ class TestMainApplicationHandlers:
 class TestMainApplicationInitialization:
     """Tests for application initialization."""
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_init_app_with_ha_environment(self):
         """Test app initialization with HA environment variables."""
@@ -469,6 +493,7 @@ class TestMainApplicationInitialization:
                 assert app['event_logger'] is not None
                 assert app['ocpp_service_manager'] is not None
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_init_app_without_ha_environment(self):
         """Test app initialization without HA environment variables."""
@@ -483,6 +508,7 @@ class TestMainApplicationInitialization:
                 assert app['event_logger'] is not None
                 assert app['ocpp_service_manager'] is not None
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_init_app_custom_db_path(self):
         """Test app initialization with custom database path."""
@@ -495,6 +521,7 @@ class TestMainApplicationInitialization:
                     
                     mock_logger.assert_called_once_with(db_path='/custom/path/log.db')
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_init_app_route_registration(self):
         """Test that all routes are registered correctly."""
@@ -514,6 +541,7 @@ class TestMainApplicationInitialization:
             assert '/status' in route_paths
             assert '/override' in route_paths
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_init_app_ocpp_service_startup(self):
         """Test that OCPP services are started during initialization."""
@@ -527,6 +555,7 @@ class TestMainApplicationInitialization:
             # Should start OCPP services
             mock_manager_instance.start_services.assert_called_once()
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_init_app_backend_manager_app_reference(self):
         """Test that backend manager gets app reference."""

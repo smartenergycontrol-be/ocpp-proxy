@@ -26,6 +26,7 @@ class TestEventLogger:
         """Create an EventLogger instance for testing."""
         return EventLogger(temp_db_path)
 
+    @pytest.mark.unit
     def test_initialization_default_path(self):
         """Test EventLogger initialization with default path."""
         logger = EventLogger()
@@ -35,11 +36,13 @@ class TestEventLogger:
         if os.path.exists('usage_log.db'):
             os.unlink('usage_log.db')
 
+    @pytest.mark.unit
     def test_initialization_custom_path(self, temp_db_path):
         """Test EventLogger initialization with custom path."""
         logger = EventLogger(temp_db_path)
         assert logger.db_path == temp_db_path
 
+    @pytest.mark.unit
     def test_database_schema_creation(self, event_logger):
         """Test that database schema is created correctly."""
         # Connect to the database and check schema
@@ -70,6 +73,7 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_log_session_basic(self, event_logger):
         """Test logging a basic session."""
         event_logger.log_session(
@@ -100,6 +104,7 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_log_multiple_sessions(self, event_logger):
         """Test logging multiple sessions."""
         sessions = [
@@ -126,6 +131,7 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_log_session_with_zero_values(self, event_logger):
         """Test logging session with zero values."""
         event_logger.log_session(
@@ -150,6 +156,7 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_log_session_with_negative_values(self, event_logger):
         """Test logging session with negative values."""
         event_logger.log_session(
@@ -174,6 +181,7 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_log_session_with_special_characters(self, event_logger):
         """Test logging session with special characters in backend_id."""
         backend_id = 'backend_with_special_chars!@#$%^&*()_+-=[]{}|;:,.<>?'
@@ -196,6 +204,7 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_log_session_with_unicode_characters(self, event_logger):
         """Test logging session with unicode characters."""
         backend_id = 'backend_with_unicode_éñ中文🚗⚡'
@@ -218,11 +227,13 @@ class TestEventLogger:
         
         conn.close()
 
+    @pytest.mark.unit
     def test_get_sessions_empty(self, event_logger):
         """Test getting sessions from empty database."""
         sessions = event_logger.get_sessions()
         assert sessions == []
 
+    @pytest.mark.unit
     def test_get_sessions_single(self, event_logger):
         """Test getting single session."""
         # Log a session
@@ -242,6 +253,7 @@ class TestEventLogger:
         timestamp = datetime.fromisoformat(session['timestamp'])
         assert isinstance(timestamp, datetime)
 
+    @pytest.mark.unit
     def test_get_sessions_multiple(self, event_logger):
         """Test getting multiple sessions."""
         # Log sessions with different timestamps
@@ -263,6 +275,7 @@ class TestEventLogger:
         assert 'backend2' in backend_ids
         assert 'backend3' in backend_ids
 
+    @pytest.mark.unit
     def test_get_sessions_ordering(self, event_logger):
         """Test that sessions are returned in timestamp order."""
         # Log sessions with slight delays to ensure different timestamps
@@ -286,6 +299,7 @@ class TestEventLogger:
         timestamps = [datetime.fromisoformat(session['timestamp']) for session in sessions]
         assert timestamps[0] <= timestamps[1] <= timestamps[2]
 
+    @pytest.mark.unit
     def test_get_sessions_data_structure(self, event_logger):
         """Test the data structure returned by get_sessions."""
         event_logger.log_session('test_backend', 3600.0, 25.0, 5.0)
@@ -305,11 +319,13 @@ class TestEventLogger:
         assert isinstance(session['energy_kwh'], (int, float))
         assert isinstance(session['revenue'], (int, float))
 
+    @pytest.mark.unit
     def test_export_db_returns_path(self, event_logger):
         """Test that export_db returns the correct database path."""
         db_path = event_logger.export_db()
         assert db_path == event_logger.db_path
 
+    @pytest.mark.unit
     def test_export_db_file_exists(self, event_logger):
         """Test that export_db returns path to existing file."""
         # Log a session to ensure database exists
@@ -318,6 +334,7 @@ class TestEventLogger:
         db_path = event_logger.export_db()
         assert os.path.exists(db_path)
 
+    @pytest.mark.unit
     def test_concurrent_logging(self, event_logger):
         """Test concurrent session logging."""
         import threading
@@ -351,6 +368,7 @@ class TestEventLogger:
         sessions = event_logger.get_sessions()
         assert len(sessions) == 15  # 3 threads * 5 sessions each
 
+    @pytest.mark.unit
     def test_database_persistence(self, temp_db_path):
         """Test that database persists between EventLogger instances."""
         # Create first logger and log a session
@@ -365,6 +383,7 @@ class TestEventLogger:
         assert len(sessions) == 1
         assert sessions[0]['backend_id'] == 'test_backend'
 
+    @pytest.mark.unit
     def test_database_connection_handling(self, event_logger):
         """Test that database connections are properly handled."""
         # Log multiple sessions
@@ -376,6 +395,7 @@ class TestEventLogger:
             sessions = event_logger.get_sessions()
             assert len(sessions) == 10
 
+    @pytest.mark.unit
     def test_log_session_with_float_precision(self, event_logger):
         """Test logging session with high precision float values."""
         event_logger.log_session(
@@ -393,6 +413,7 @@ class TestEventLogger:
         assert abs(session['energy_kwh'] - 25.987654321) < 1e-6
         assert abs(session['revenue'] - 5.12345678901234567890) < 1e-6
 
+    @pytest.mark.unit
     @patch('src.ocpp_proxy.logger.datetime')
     def test_log_session_timestamp_format(self, mock_datetime, event_logger):
         """Test that timestamp is in correct ISO format."""
@@ -406,6 +427,7 @@ class TestEventLogger:
         sessions = event_logger.get_sessions()
         assert sessions[0]['timestamp'] == '2023-01-01T12:00:00.123456'
 
+    @pytest.mark.unit
     def test_database_error_handling(self, event_logger):
         """Test handling of database errors."""
         # Close the database file to simulate error
@@ -419,6 +441,7 @@ class TestEventLogger:
             # Restore permissions for cleanup
             os.chmod(event_logger.db_path, 0o644)
 
+    @pytest.mark.unit
     def test_large_dataset_performance(self, event_logger):
         """Test performance with larger dataset."""
         import time

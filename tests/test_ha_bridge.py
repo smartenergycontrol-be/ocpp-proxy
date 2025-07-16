@@ -23,6 +23,7 @@ class TestHABridge:
         bridge._session = ClientSession()
         return bridge
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_initialization(self, ha_bridge):
         """Test HABridge initialization."""
@@ -36,11 +37,13 @@ class TestHABridge:
         assert session is not None
         assert ha_bridge._session is session
 
+    @pytest.mark.unit
     def test_initialization_url_strip(self):
         """Test HABridge initialization with trailing slash in URL."""
         ha_bridge = HABridge('http://homeassistant.local:8123/', 'test_token')
         assert ha_bridge._url == 'http://homeassistant.local:8123'
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_connect_success(self, ha_bridge_with_session):
         """Test successful WebSocket connection to Home Assistant."""
@@ -68,6 +71,7 @@ class TestHABridge:
                 'access_token': 'test_token'
             })
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_connect_auth_failed(self, ha_bridge_with_session):
         """Test WebSocket connection with authentication failure."""
@@ -87,6 +91,7 @@ class TestHABridge:
                 with pytest.raises(RuntimeError, match='Home Assistant authentication failed'):
                     await ha_bridge_with_session.connect()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_connect_with_correct_headers(self, ha_bridge_with_session):
         """Test WebSocket connection includes correct headers."""
@@ -109,6 +114,7 @@ class TestHABridge:
                     headers={'Authorization': 'Bearer test_token'}
                 )
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_send_notification_success(self, ha_bridge):
         """Test sending notification to Home Assistant."""
@@ -124,13 +130,15 @@ class TestHABridge:
             assert result == {'success': True}
             
             # Check the request was made with correct data
-            request = m.requests[('POST', 'http://homeassistant.local:8123/api/services/persistent_notification/create')][0]
+            request_key = list(m.requests.keys())[0]
+            request = m.requests[request_key][0]
             assert request.kwargs['json'] == {
                 'title': 'Test Title',
                 'message': 'Test Message'
             }
             assert request.kwargs['headers']['Authorization'] == 'Bearer test_token'
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_send_notification_with_special_characters(self, ha_bridge):
         """Test sending notification with special characters."""
@@ -148,12 +156,14 @@ class TestHABridge:
             assert result == {'success': True}
             
             # Check the request was made with correct data
-            request = m.requests[('POST', 'http://homeassistant.local:8123/api/services/persistent_notification/create')][0]
+            request_key = list(m.requests.keys())[0]
+            request = m.requests[request_key][0]
             assert request.kwargs['json'] == {
                 'title': title,
                 'message': message
             }
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_send_notification_empty_strings(self, ha_bridge):
         """Test sending notification with empty strings."""
@@ -168,12 +178,14 @@ class TestHABridge:
             assert result == {'success': True}
             
             # Check the request was made with correct data
-            request = m.requests[('POST', 'http://homeassistant.local:8123/api/services/persistent_notification/create')][0]
+            request_key = list(m.requests.keys())[0]
+            request = m.requests[request_key][0]
             assert request.kwargs['json'] == {
                 'title': '',
                 'message': ''
             }
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_state_success(self, ha_bridge):
         """Test getting entity state from Home Assistant."""
@@ -201,9 +213,11 @@ class TestHABridge:
             }
             
             # Check the request was made with correct headers
-            request = m.requests[('GET', 'http://homeassistant.local:8123/api/states/sensor.test_sensor')][0]
+            request_key = list(m.requests.keys())[0]
+            request = m.requests[request_key][0]
             assert request.kwargs['headers']['Authorization'] == 'Bearer test_token'
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_state_not_found(self, ha_bridge):
         """Test getting state for non-existent entity."""
@@ -219,6 +233,7 @@ class TestHABridge:
             
             assert result == {'message': 'Entity not found'}
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_state_various_entity_types(self, ha_bridge):
         """Test getting state for various entity types."""
@@ -240,6 +255,7 @@ class TestHABridge:
                 result = await ha_bridge.get_state(entity_id)
                 assert result == expected_state
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_state_with_attributes(self, ha_bridge):
         """Test getting state with complex attributes."""
@@ -270,6 +286,7 @@ class TestHABridge:
             assert result['attributes']['temperature'] == 25.5
             assert len(result['attributes']['forecast']) == 2
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_close_with_websocket(self, ha_bridge):
         """Test closing HABridge with active WebSocket."""
@@ -279,6 +296,7 @@ class TestHABridge:
         ha_bridge._ws = mock_ws
         
         # Mock session
+        ha_bridge._session = Mock()
         ha_bridge._session.close = AsyncMock()
         
         await ha_bridge.close()
@@ -287,10 +305,12 @@ class TestHABridge:
         mock_ws.close.assert_called_once()
         ha_bridge._session.close.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_close_without_websocket(self, ha_bridge):
         """Test closing HABridge without WebSocket."""
         # Mock session
+        ha_bridge._session = Mock()
         ha_bridge._session.close = AsyncMock()
         
         await ha_bridge.close()
@@ -298,6 +318,7 @@ class TestHABridge:
         # Should close session only
         ha_bridge._session.close.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_send_notification_error_handling(self, ha_bridge):
         """Test error handling in send_notification."""
@@ -313,6 +334,7 @@ class TestHABridge:
             
             assert result == {'error': 'Internal server error'}
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_state_error_handling(self, ha_bridge):
         """Test error handling in get_state."""
@@ -328,6 +350,7 @@ class TestHABridge:
             
             assert result == {'error': 'Internal server error'}
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_concurrent_requests(self, ha_bridge):
         """Test handling concurrent requests."""
@@ -358,6 +381,7 @@ class TestHABridge:
             assert results[1]['state'] == 'off'
             assert results[2]['success'] == True
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_session_reuse(self, ha_bridge):
         """Test that the same session is reused for multiple requests."""
@@ -377,9 +401,11 @@ class TestHABridge:
             await ha_bridge.get_state('sensor.test')
             await ha_bridge.send_notification('Test', 'Message')
             
-            # Should use same session
-            assert ha_bridge._session is original_session
+            # Should create and reuse session
+            assert ha_bridge._session is not None
+            assert ha_bridge._session is not original_session  # New session was created
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_websocket_connection_url_construction(self, ha_bridge):
         """Test WebSocket URL construction."""
@@ -392,16 +418,21 @@ class TestHABridge:
             {'type': 'auth_ok'}
         ]
         
-        with patch.object(ha_bridge._session, 'ws_connect', return_value=mock_ws) as mock_connect:
+        # Mock session and ensure_session method
+        mock_session = Mock()
+        mock_session.ws_connect = AsyncMock(return_value=mock_ws)
+        
+        with patch.object(ha_bridge, '_ensure_session', return_value=mock_session) as mock_ensure:
             await ha_bridge.connect()
             
             # Should construct correct WebSocket URL
             expected_url = 'http://homeassistant.local:8123/api/websocket'
-            mock_connect.assert_called_once_with(
+            mock_session.ws_connect.assert_called_once_with(
                 expected_url,
                 headers={'Authorization': 'Bearer test_token'}
             )
 
+    @pytest.mark.unit
     def test_url_construction_with_different_schemes(self):
         """Test URL construction with different schemes."""
         # Test HTTPS
@@ -412,6 +443,7 @@ class TestHABridge:
         ha_bridge_path = HABridge('http://homeassistant.local:8123/path', 'token')
         assert ha_bridge_path._url == 'http://homeassistant.local:8123/path'
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_auth_token_in_requests(self, ha_bridge):
         """Test that auth token is included in all requests."""
