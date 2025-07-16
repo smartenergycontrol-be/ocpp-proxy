@@ -183,10 +183,10 @@ class TestMainApplication(AioHTTPTestCase):
         """Test the charger WebSocket handler."""
         # This is a complex test as it involves WebSocket connections
         # We'll mock the WebSocket and ChargePoint
-        with patch('src.ocpp_proxy.main.ChargePoint') as mock_cp_class:
+        with patch('src.ocpp_proxy.main.ChargePointFactory.create_charge_point') as mock_cp_factory:
             mock_cp = Mock()
             mock_cp.start = AsyncMock()
-            mock_cp_class.return_value = mock_cp
+            mock_cp_factory.return_value = mock_cp
             
             # Create a mock WebSocket connection
             async with self.client.ws_connect('/charger') as ws:
@@ -204,10 +204,10 @@ class TestMainApplication(AioHTTPTestCase):
                 with patch.object(self.app['backend_manager'], 'request_control', return_value=True) as mock_request:
                     # Create a mock charge point
                     mock_cp = Mock()
-                    mock_cp.call_remote_start_transaction = AsyncMock()
+                    mock_cp.send_remote_start_transaction = AsyncMock()
                     # Create a JSON-serializable mock result
                     mock_result = {'status': 'Accepted'}
-                    mock_cp.call_remote_start_transaction.return_value = mock_result
+                    mock_cp.send_remote_start_transaction.return_value = mock_result
                     
                     self.app['charge_point'] = mock_cp
                     
@@ -239,10 +239,10 @@ class TestMainApplication(AioHTTPTestCase):
             with patch.object(self.app['backend_manager'], 'unsubscribe'):
                 # Create a mock charge point
                 mock_cp = Mock()
-                mock_cp.call_remote_stop_transaction = AsyncMock()
+                mock_cp.send_remote_stop_transaction = AsyncMock()
                 # Create a JSON-serializable mock result
                 mock_result = {'status': 'Accepted'}
-                mock_cp.call_remote_stop_transaction.return_value = mock_result
+                mock_cp.send_remote_stop_transaction.return_value = mock_result
                 
                 self.app['charge_point'] = mock_cp
                 

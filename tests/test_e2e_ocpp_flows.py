@@ -51,16 +51,16 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
     async def test_charger_boot_sequence(self):
         """Test complete charger boot sequence."""
         # Mock ChargePoint to capture boot sequence
-        with patch('src.ocpp_proxy.main.ChargePoint') as mock_cp_class:
+        with patch('src.ocpp_proxy.main.ChargePointFactory.create_charge_point') as mock_cp_factory:
             mock_cp = Mock()
             mock_cp.start = AsyncMock()
-            mock_cp_class.return_value = mock_cp
+            mock_cp_factory.return_value = mock_cp
             
             # Connect charger
             async with self.client.ws_connect('/charger') as ws:
                 # Verify ChargePoint was created with correct parameters
-                mock_cp_class.assert_called_once()
-                call_args = mock_cp_class.call_args
+                mock_cp_factory.assert_called_once()
+                call_args = mock_cp_factory.call_args
                 
                 assert call_args[0][0] == 'CP-1'  # charge point ID
                 assert call_args[1]['manager'] == self.app['backend_manager']
@@ -197,13 +197,13 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
             mock_cp = Mock()
             mock_cp.start = AsyncMock()
             
-            with patch('src.ocpp_proxy.main.ChargePoint') as mock_cp_class:
-                mock_cp_class.return_value = mock_cp
+            with patch('src.ocpp_proxy.main.ChargePointFactory.create_charge_point') as mock_cp_factory:
+                mock_cp_factory.return_value = mock_cp
                 
                 # Connect charger
                 async with self.client.ws_connect('/charger') as ws:
                     # Simulate charger events by calling methods directly
-                    charge_point = mock_cp_class.return_value
+                    charge_point = mock_cp_factory.return_value
                     charge_point.manager = self.app['backend_manager']
                     
                     # Import the actual ChargePoint class to test event methods

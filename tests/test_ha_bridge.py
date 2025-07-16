@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 import json
 from unittest.mock import Mock, AsyncMock, patch
 from aiohttp import ClientSession, ClientWebSocketResponse
@@ -15,13 +16,16 @@ class TestHABridge:
         """Create an HABridge instance for testing."""
         return HABridge('http://homeassistant.local:8123', 'test_token')
 
-    @pytest.fixture
-    def ha_bridge_with_session(self):
+    @pytest_asyncio.fixture
+    async def ha_bridge_with_session(self):
         """Create an HABridge instance with initialized session for testing."""
         bridge = HABridge('http://homeassistant.local:8123', 'test_token')
         # Force session creation for testing
         bridge._session = ClientSession()
-        return bridge
+        yield bridge
+        # Cleanup
+        if bridge._session:
+            await bridge._session.close()
 
     @pytest.mark.unit
     @pytest.mark.asyncio
