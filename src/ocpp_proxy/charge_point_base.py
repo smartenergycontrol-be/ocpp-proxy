@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
 import datetime
+from abc import ABC, abstractmethod
+from typing import Any
 
 
 class ChargePointBase(ABC):
@@ -16,42 +16,40 @@ class ChargePointBase(ABC):
         self.ha_bridge = ha_bridge
         self.event_logger = event_logger
         # Track ongoing sessions: tx_id -> start info
-        self._sessions: Dict[int, Dict[str, Any]] = {}
+        self._sessions: dict[int, dict[str, Any]] = {}
         self._tx_counter = 0
 
     @property
     @abstractmethod
     def ocpp_version(self) -> str:
         """Return the OCPP version this implementation supports."""
-        pass
 
     @abstractmethod
     async def start(self):
         """Start the ChargePoint and handle incoming messages."""
-        pass
 
     @abstractmethod
     async def send_remote_start_transaction(self, connector_id: int, id_tag: str) -> bool:
         """Send RemoteStartTransaction command to charger."""
-        pass
 
     @abstractmethod
     async def send_remote_stop_transaction(self, transaction_id: int) -> bool:
         """Send RemoteStopTransaction command to charger."""
-        pass
 
     def _get_next_transaction_id(self) -> int:
         """Get the next transaction ID."""
         self._tx_counter += 1
         return self._tx_counter
 
-    def _store_session(self, tx_id: int, connector_id: int, id_tag: str, timestamp: str, meter_start: int):
+    def _store_session(
+        self, tx_id: int, connector_id: int, id_tag: str, timestamp: str, meter_start: int
+    ):
         """Store session start information."""
         self._sessions[tx_id] = {
-            'connector_id': connector_id,
-            'id_tag': id_tag,
-            'start_time': timestamp,
-            'start_meter': meter_start,
+            "connector_id": connector_id,
+            "id_tag": id_tag,
+            "start_time": timestamp,
+            "start_meter": meter_start,
         }
 
     def _finalize_session(self, tx_id: int, meter_stop: int, timestamp: str):
@@ -60,21 +58,21 @@ class ChargePointBase(ABC):
         if info and self.event_logger:
             # Parse timestamps
             try:
-                t0 = datetime.datetime.fromisoformat(info['start_time'])
+                t0 = datetime.datetime.fromisoformat(info["start_time"])
                 t1 = datetime.datetime.fromisoformat(timestamp)
                 duration = (t1 - t0).total_seconds()
             except Exception:
                 duration = 0.0
             # Energy in kWh (meter values are Wh)
-            energy = (meter_stop - info.get('start_meter', 0)) / 1000.0
+            energy = (meter_stop - info.get("start_meter", 0)) / 1000.0
             # Revenue calculation placeholder
             revenue = 0.0
             # Determine backend owner
-            backend_id = self.manager._lock_owner if self.manager else ''
+            backend_id = self.manager._lock_owner if self.manager else ""
             self.event_logger.log_session(backend_id, duration, energy, revenue)
         return info
 
-    def _broadcast_event(self, event: Dict[str, Any]):
+    def _broadcast_event(self, event: dict[str, Any]):
         """Broadcast event to all subscribers."""
         if self.manager:
             self.manager.broadcast_event(event)
@@ -86,5 +84,5 @@ class ChargePointBase(ABC):
 
     def _handle_charger_fault(self, status: str, error_code: str):
         """Handle charger fault conditions."""
-        if status.lower() in ('faulted', 'unavailable') and self.manager:
+        if status.lower() in ("faulted", "unavailable") and self.manager:
             self.manager.release_control()

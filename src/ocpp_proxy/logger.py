@@ -1,5 +1,5 @@
-import sqlite3
 import datetime
+import sqlite3
 
 
 class EventLogger:
@@ -7,11 +7,12 @@ class EventLogger:
     Track charger sessions and revenue, persist in SQLite.
     """
 
-    def __init__(self, db_path: str = 'usage_log.db'):
+    def __init__(self, db_path: str = "usage_log.db"):
         self.db_path = db_path
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS sessions (
                 timestamp TEXT,
                 backend_id TEXT,
@@ -19,25 +20,21 @@ class EventLogger:
                 energy_kwh REAL,
                 revenue REAL
             )
-        ''')
+        """
+        )
         conn.commit()
         conn.close()
 
     def log_session(
-        self,
-        backend_id: str,
-        duration_s: float,
-        energy_kwh: float,
-        revenue: float
+        self, backend_id: str, duration_s: float, energy_kwh: float, revenue: float
     ) -> None:
         """Persist a session record into SQLite."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO sessions (timestamp, backend_id, duration_s, energy_kwh, revenue) '
-            'VALUES (?, ?, ?, ?, ?)',
-            (datetime.datetime.utcnow().isoformat(),
-             backend_id, duration_s, energy_kwh, revenue)
+            "INSERT INTO sessions (timestamp, backend_id, duration_s, energy_kwh, revenue) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (datetime.datetime.utcnow().isoformat(), backend_id, duration_s, energy_kwh, revenue),
         )
         conn.commit()
         conn.close()
@@ -47,21 +44,23 @@ class EventLogger:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute(
-            'SELECT timestamp, backend_id, duration_s, energy_kwh, revenue '
-            'FROM sessions ORDER BY timestamp'
+            "SELECT timestamp, backend_id, duration_s, energy_kwh, revenue "
+            "FROM sessions ORDER BY timestamp"
         )
         rows = cursor.fetchall()
         conn.close()
 
         sessions = []
         for ts, backend, dur, energy, rev in rows:
-            sessions.append({
-                'timestamp': ts,
-                'backend_id': backend,
-                'duration_s': dur,
-                'energy_kwh': energy,
-                'revenue': rev,
-            })
+            sessions.append(
+                {
+                    "timestamp": ts,
+                    "backend_id": backend,
+                    "duration_s": dur,
+                    "energy_kwh": energy,
+                    "revenue": rev,
+                }
+            )
         return sessions
 
     def export_db(self) -> str:

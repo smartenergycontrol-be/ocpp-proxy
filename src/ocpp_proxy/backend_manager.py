@@ -1,8 +1,10 @@
 import asyncio
 import datetime
-from typing import Any, Optional, Dict
-from .config import Config
+from typing import Any
+
 from aiohttp import web
+
+from .config import Config
 
 
 class BackendManager:
@@ -16,11 +18,11 @@ class BackendManager:
         self.ha = ha_bridge
         self.ocpp_service_manager = ocpp_service_manager
         # Map backend_id → WS connection for event broadcasting
-        self.subscribers: Dict[str, web.WebSocketResponse] = {}
-        self._lock_owner: Optional[str] = None
-        self._lock_timer: Optional[asyncio.Task] = None
+        self.subscribers: dict[str, web.WebSocketResponse] = {}
+        self._lock_owner: str | None = None
+        self._lock_timer: asyncio.Task | None = None
         # Rate-limiting timestamps per backend
-        self._last_request_time: Dict[str, datetime.datetime] = {}
+        self._last_request_time: dict[str, datetime.datetime] = {}
         # Reference to app for charge point access
         self._app = None
 
@@ -40,10 +42,10 @@ class BackendManager:
         for ws in list(self.subscribers.values()):
             # best-effort send; ignore failures
             try:
-                ws.send_json({'type': 'event', **event})
+                ws.send_json({"type": "event", **event})
             except Exception:
                 continue
-        
+
         # Broadcast to OCPP services
         if self.ocpp_service_manager:
             self.ocpp_service_manager.broadcast_event_to_services(event)
@@ -65,7 +67,7 @@ class BackendManager:
         if self.ha and self.config.override_input_boolean:
             try:
                 state = await self.ha.get_state(self.config.override_input_boolean)
-                if state.get('state') != 'on':
+                if state.get("state") != "on":
                     return False
             except Exception:
                 # Fail-safe: allow control if HA is unavailable
@@ -75,23 +77,25 @@ class BackendManager:
         if self.ha and self.config.presence_sensor:
             try:
                 state = await self.ha.get_state(self.config.presence_sensor)
-                if state.get('state') == 'home':
+                if state.get("state") == "home":
                     return False
             except Exception:
                 # Fail-safe: allow control if HA is unavailable
                 pass
 
         # Provider filtering (skip for OCPP services)
-        if not backend_id.startswith('ocpp_service_'):
+        if not backend_id.startswith("ocpp_service_"):
             if backend_id in self.config.blocked_providers:
                 return False
             if self.config.allowed_providers and backend_id not in self.config.allowed_providers:
                 return False
 
         # Preferred-provider preemption
-        if (self._lock_owner and
-                backend_id == self.config.preferred_provider and
-                backend_id != self._lock_owner):
+        if (
+            self._lock_owner
+            and backend_id == self.config.preferred_provider
+            and backend_id != self._lock_owner
+        ):
             self.release_control()
 
         # Grant if free
@@ -125,12 +129,12 @@ class BackendManager:
     def get_backend_status(self) -> dict:
         """Get status of all backends including OCPP services."""
         status = {
-            'websocket_backends': list(self.subscribers.keys()),
-            'lock_owner': self._lock_owner,
-            'ocpp_services': {}
+            "websocket_backends": list(self.subscribers.keys()),
+            "lock_owner": self._lock_owner,
+            "ocpp_services": {},
         }
-        
+
         if self.ocpp_service_manager:
-            status['ocpp_services'] = self.ocpp_service_manager.get_service_status()
-        
+            status["ocpp_services"] = self.ocpp_service_manager.get_service_status()
+
         return status
