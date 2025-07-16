@@ -21,7 +21,7 @@ class TestOCPPFlowsE2E(AioHTTPTestCase):
         return {
             'allow_shared_charging': True,
             'preferred_provider': 'preferred_backend',
-            'disallowed_providers': [],
+            'blocked_providers': [],
             'allowed_providers': [],
             'presence_sensor': '',
             'override_input_boolean': '',

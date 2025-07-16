@@ -17,7 +17,7 @@ class TestBackendManager:
         config = Mock(spec=Config)
         config.allow_shared_charging = True
         config.preferred_provider = 'preferred_provider'
-        config.disallowed_providers = ['blocked_provider']
+        config.blocked_providers = ['blocked_provider']
         config.allowed_providers = []
         config.presence_sensor = ''
         config.override_input_boolean = ''
@@ -181,7 +181,7 @@ class TestBackendManager:
     @pytest.mark.asyncio
     async def test_request_control_ocpp_service_bypass(self, backend_manager):
         """Test that OCPP services bypass provider filtering."""
-        backend_manager.config.disallowed_providers = ['ocpp_service_test']
+        backend_manager.config.blocked_providers = ['ocpp_service_test']
         backend_manager.config.allowed_providers = ['some_other_provider']
         
         # OCPP service should bypass filtering

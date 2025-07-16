@@ -13,7 +13,7 @@ boot: auto
 options:
   allow_shared_charging: true
   preferred_provider: ''
-  disallowed_providers: []
+  blocked_providers: []
   allowed_providers: []
   presence_sensor: ''
   override_input_boolean: ''
@@ -24,7 +24,7 @@ schema:
     type: boolean
   preferred_provider:
     type: string
-  disallowed_providers:
+  blocked_providers:
     type: array
     items:
       type: string

@@ -49,7 +49,7 @@ def mock_config():
     config = Mock(spec=Config)
     config.allow_shared_charging = True
     config.preferred_provider = 'preferred_provider'
-    config.disallowed_providers = ['blocked_provider']
+    config.blocked_providers = ['blocked_provider']
     config.allowed_providers = []
     config.presence_sensor = ''
     config.override_input_boolean = ''

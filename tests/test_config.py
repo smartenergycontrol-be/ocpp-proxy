@@ -16,7 +16,7 @@ class TestConfig:
         config_data = {
             'allow_shared_charging': True,
             'preferred_provider': 'test_provider',
-            'disallowed_providers': ['bad_provider'],
+            'blocked_providers': ['bad_provider'],
             'allowed_providers': ['good_provider'],
             'presence_sensor': 'binary_sensor.presence',
             'override_input_boolean': 'input_boolean.override',
@@ -40,7 +40,7 @@ class TestConfig:
             config = Config(config_path)
             assert config.allow_shared_charging == True
             assert config.preferred_provider == 'test_provider'
-            assert config.disallowed_providers == ['bad_provider']
+            assert config.blocked_providers == ['bad_provider']
             assert config.allowed_providers == ['good_provider']
             assert config.presence_sensor == 'binary_sensor.presence'
             assert config.override_input_boolean == 'input_boolean.override'
@@ -56,7 +56,7 @@ class TestConfig:
         config = Config('/nonexistent/path/config.yaml')
         assert config.allow_shared_charging == False
         assert config.preferred_provider == ''
-        assert config.disallowed_providers == []
+        assert config.blocked_providers == []
         assert config.allowed_providers == []
         assert config.presence_sensor == ''
         assert config.override_input_boolean == ''
@@ -74,7 +74,7 @@ class TestConfig:
             config = Config(config_path)
             assert config.allow_shared_charging == False
             assert config.preferred_provider == ''
-            assert config.disallowed_providers == []
+            assert config.blocked_providers == []
             assert config.allowed_providers == []
             assert config.presence_sensor == ''
             assert config.override_input_boolean == ''
@@ -99,7 +99,7 @@ class TestConfig:
             config = Config(config_path)
             assert config.allow_shared_charging == True
             assert config.preferred_provider == ''
-            assert config.disallowed_providers == []
+            assert config.blocked_providers == []
             assert config.allowed_providers == []
             assert config.presence_sensor == ''
             assert config.override_input_boolean == ''
@@ -115,7 +115,7 @@ class TestConfig:
             'allow_shared_charging': 'true',  # string that should convert to bool
             'rate_limit_seconds': '25',       # string that should convert to int
             'preferred_provider': 123,        # int that should convert to string
-            'disallowed_providers': ['single_provider'],  # list should stay as list
+            'blocked_providers': ['single_provider'],  # list should stay as list
             'allowed_providers': None,        # None that should convert to list
             'ocpp_services': None            # None that should convert to list
         }
@@ -129,7 +129,7 @@ class TestConfig:
             assert config.allow_shared_charging == True
             assert config.rate_limit_seconds == 25
             assert config.preferred_provider == '123'
-            assert config.disallowed_providers == ['single_provider']
+            assert config.blocked_providers == ['single_provider']
             assert config.allowed_providers == []
             assert config.ocpp_services == []
         finally:
@@ -238,7 +238,7 @@ class TestConfig:
         ]
         
         for input_val, expected in test_cases:
-            config_data = {'disallowed_providers': input_val}
+            config_data = {'blocked_providers': input_val}
             
             with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
                 yaml.dump(config_data, f)
@@ -246,7 +246,7 @@ class TestConfig:
             
             try:
                 config = Config(config_path)
-                assert config.disallowed_providers == expected, f"Input {input_val} should convert to {expected}"
+                assert config.blocked_providers == expected, f"Input {input_val} should convert to {expected}"
             finally:
                 os.unlink(config_path)
 
@@ -328,5 +328,47 @@ class TestConfig:
             # Should raise ValueError when trying to convert invalid string to int
             with pytest.raises(ValueError):
                 _ = config.rate_limit_seconds
+        finally:
+            os.unlink(config_path)
+
+    @pytest.mark.unit
+    def test_backward_compatibility_disallowed_providers(self):
+        """Test backward compatibility for disallowed_providers property."""
+        config_data = {
+            'disallowed_providers': ['old_blocked_provider'],
+            'allowed_providers': ['allowed_provider']
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            config_path = f.name
+        
+        try:
+            config = Config(config_path)
+            # Old property should still work
+            assert config.disallowed_providers == ['old_blocked_provider']
+            # New property should return the same value
+            assert config.blocked_providers == ['old_blocked_provider']
+        finally:
+            os.unlink(config_path)
+
+    @pytest.mark.unit
+    def test_new_terminology_blocked_providers(self):
+        """Test new terminology for blocked_providers property."""
+        config_data = {
+            'blocked_providers': ['new_blocked_provider'],
+            'allowed_providers': ['allowed_provider']
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump(config_data, f)
+            config_path = f.name
+        
+        try:
+            config = Config(config_path)
+            # New property should work
+            assert config.blocked_providers == ['new_blocked_provider']
+            # Old property should return the same value for backward compatibility
+            assert config.disallowed_providers == ['new_blocked_provider']
         finally:
             os.unlink(config_path)

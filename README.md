@@ -28,7 +28,7 @@ The proxy sits between a single EV charger and multiple backend services (energy
 
 ### 🛡️ **Safety & Security**
 - Automatic safety controls prevent conflicts and handle charger faults
-- Rate limiting and provider filtering (whitelist/blacklist support)
+- Rate limiting and provider filtering (allowlist/blocklist support)
 - Charger fault detection automatically revokes backend control
 
 ### 📊 **Monitoring & Analytics**
@@ -102,8 +102,8 @@ presence_sensor: "binary_sensor.someone_home"
 override_input_boolean: "input_boolean.charger_override"
 
 # Provider Management
-allowed_providers: ["provider1", "provider2"]  # Optional whitelist
-disallowed_providers: ["spammer"]              # Optional blacklist
+allowed_providers: ["provider1", "provider2"]  # Optional allowlist
+blocked_providers: ["spammer"]                 # Optional blocklist
 
 # OCPP Services (Outbound Connections)
 ocpp_services:
@@ -233,7 +233,7 @@ Homeowner with EV charger wants to:
 - **Conflict Prevention**: Only one backend can control charger simultaneously
 - **User Override**: Always possible via Home Assistant interface
 - **Rate Limiting**: Prevents spam requests from backends
-- **Provider Filtering**: Whitelist/blacklist support for security
+- **Provider Filtering**: Allowlist/blocklist support for security
 
 ## 📈 Future Roadmap
 

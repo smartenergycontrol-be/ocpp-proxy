@@ -81,9 +81,9 @@ class BackendManager:
                 # Fail-safe: allow control if HA is unavailable
                 pass
 
-        # Provider whitelist/blacklist (skip for OCPP services)
+        # Provider filtering (skip for OCPP services)
         if not backend_id.startswith('ocpp_service_'):
-            if backend_id in self.config.disallowed_providers:
+            if backend_id in self.config.blocked_providers:
                 return False
             if self.config.allowed_providers and backend_id not in self.config.allowed_providers:
                 return False

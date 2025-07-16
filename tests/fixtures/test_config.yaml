@@ -1,7 +1,7 @@
 # Test configuration file
 allow_shared_charging: true
 preferred_provider: 'preferred_test_backend'
-disallowed_providers:
+blocked_providers:
   - 'blocked_backend'
   - 'malicious_backend'
 allowed_providers: []

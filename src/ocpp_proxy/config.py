@@ -27,16 +27,23 @@ class Config:
         return str(self._cfg.get('preferred_provider', ''))
 
     @property
-    def disallowed_providers(self) -> list:
-        """Return list of provider IDs that are always disallowed."""
-        value = self._cfg.get('disallowed_providers', [])
+    def blocked_providers(self) -> list:
+        """Return list of provider IDs that are always blocked."""
+        # Support both old and new terminology for backward compatibility
+        value = self._cfg.get('blocked_providers', self._cfg.get('disallowed_providers', []))
         return list(value) if value is not None else []
 
     @property
     def allowed_providers(self) -> list:
-        """Return whitelist of provider IDs; empty means no whitelist."""
+        """Return allowlist of provider IDs; empty means no restrictions."""
         value = self._cfg.get('allowed_providers', [])
         return list(value) if value is not None else []
+
+    # Backward compatibility properties
+    @property
+    def disallowed_providers(self) -> list:
+        """Return list of provider IDs that are always blocked. (deprecated: use blocked_providers)"""
+        return self.blocked_providers
 
     @property
     def presence_sensor(self) -> str:

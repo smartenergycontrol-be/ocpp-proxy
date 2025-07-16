@@ -1,7 +1,7 @@
 # Standalone configuration for OCPP Proxy
 allow_shared_charging: true
 preferred_provider: ''
-disallowed_providers: []
+blocked_providers: []
 allowed_providers: []
 presence_sensor: ''
 override_input_boolean: ''
