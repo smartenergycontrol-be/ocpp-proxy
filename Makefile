@@ -22,8 +22,11 @@ help:
 	@echo "  test-all    Run complete test suite"
 	@echo ""
 	@echo "Code Quality:"
-	@echo "  lint        Run linting (when configured)"
-	@echo "  format      Format code (when configured)"
+	@echo "  lint        Run linting checks (ruff + mypy)"
+	@echo "  lint-fix    Run linting with auto-fix"
+	@echo "  format      Format code (black + ruff)"
+	@echo "  format-check Check code formatting"
+	@echo "  type-check  Run type checking (mypy)"
 	@echo "  check       Run all quality checks"
 	@echo ""
 	@echo "Development:"
@@ -63,16 +66,31 @@ test-quick:
 test-all:
 	poetry run pytest tests/ --cov=src/ocpp_proxy --cov-report=term-missing --cov-report=html:htmlcov -v
 
-# Code quality targets (placeholders for when tools are configured)
+# Code quality targets
 lint:
-	@echo "Linting not yet configured. Add flake8, pylint, or similar to requirements.txt"
-	@echo "Example: flake8 src/ tests/"
+	@echo "Running linting checks..."
+	poetry run ruff check src/ tests/
+	poetry run mypy src/
+
+lint-fix:
+	@echo "Running linting with auto-fix..."
+	poetry run ruff check --fix src/ tests/
 
 format:
-	@echo "Code formatting not yet configured. Add black, autopep8, or similar to requirements.txt"
-	@echo "Example: black src/ tests/"
+	@echo "Formatting code..."
+	poetry run black src/ tests/
+	poetry run ruff format src/ tests/
 
-check: lint
+format-check:
+	@echo "Checking code formatting..."
+	poetry run black --check src/ tests/
+	poetry run ruff format --check src/ tests/
+
+type-check:
+	@echo "Running type checking..."
+	poetry run mypy src/
+
+check: format-check lint type-check
 	@echo "Running all quality checks..."
 	poetry run python run_tests.py --unit
 
