@@ -58,7 +58,7 @@ test-e2e:
 	poetry run python run_tests.py --e2e
 
 test-coverage:
-	poetry run python run_tests.py --coverage-html
+	poetry run python run_tests.py --coverage
 
 test-quick:
 	poetry run pytest tests/ -m "unit" --cov=src/ocpp_proxy --cov-report=term-missing -v
@@ -78,12 +78,10 @@ lint-fix:
 
 format:
 	@echo "Formatting code..."
-	poetry run black src/ tests/
 	poetry run ruff format src/ tests/
 
 format-check:
 	@echo "Checking code formatting..."
-	poetry run black --check src/ tests/
 	poetry run ruff format --check src/ tests/
 
 type-check:

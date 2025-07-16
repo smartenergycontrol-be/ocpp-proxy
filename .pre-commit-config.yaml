@@ -21,13 +21,6 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
-  # Black code formatter
-  - repo: https://github.com/psf/black
-    rev: 23.12.0
-    hooks:
-      - id: black
-        language_version: python3.11
-
   # MyPy type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
@@ -45,12 +38,6 @@ repos:
         args: [-r, --format, custom, --severity-level, medium]
         exclude: ^tests/
 
-  # Additional Python checks
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: ["--profile", "black", "--filter-files"]
 
 ci:
   autofix_commit_msg: |
