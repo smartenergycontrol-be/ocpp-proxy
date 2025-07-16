@@ -1,0 +1,12 @@
+{
+  "name": "OCPP Proxy",
+  "content_in_root": false,
+  "filename": ".hacs",
+  "country": ["US", "CA", "EU", "GB", "AU", "NZ"],
+  "homeassistant": "2023.1.0",
+  "render_readme": true,
+  "documentation": "https://github.com/openchargehub/ocpp-proxy/blob/main/README.md",
+  "codeowners": ["@openchargehub"],
+  "iot_class": "Local Polling",
+  "version": "0.1.0"
+}

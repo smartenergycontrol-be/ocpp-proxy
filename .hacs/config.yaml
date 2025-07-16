@@ -1,0 +1,56 @@
+name: OCPP Proxy
+version: '0.1.0'
+slug: ocpp-proxy
+description: 'Multi-version OCPP proxy for secure EV charger sharing with Home Assistant integration'
+url: https://github.com/openchargehub/ocpp-proxy
+startup: services
+boot: auto
+init: false
+homeassistant_api: true
+hassio_api: true
+hassio_role: default
+arch:
+  - amd64
+  - armv7
+  - aarch64
+  - armhf
+map:
+  - addon_config:rw
+ports:
+  9000/tcp: 9000
+ports_description:
+  9000/tcp: OCPP WebSocket Server
+webui: http://[HOST]:[PORT:9000]
+options:
+  allow_shared_charging: true
+  preferred_provider: ''
+  disallowed_providers: []
+  allowed_providers: []
+  presence_sensor: ''
+  override_input_boolean: ''
+  rate_limit_seconds: 10
+  ocpp_version: '1.6'
+  auto_detect_ocpp_version: true
+  ocpp_services: []
+schema:
+  allow_shared_charging: bool
+  preferred_provider: str?
+  disallowed_providers:
+    - str
+  allowed_providers:
+    - str
+  presence_sensor: str?
+  override_input_boolean: str?
+  rate_limit_seconds: int(1,300)
+  ocpp_version: list(1.6|2.0.1)
+  auto_detect_ocpp_version: bool
+  ocpp_services:
+    - id: str
+      url: str
+      version: list(1.6|2.0.1)?
+      auth_type: list(none|basic|token)?
+      username: str?
+      password: str?
+      token: str?
+      enabled: bool?
+image: ghcr.io/openchargehub/ocpp-proxy

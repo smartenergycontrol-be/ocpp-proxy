@@ -40,6 +40,19 @@ The proxy sits between a single EV charger and multiple backend services (energy
 ## 🚀 Installation
 
 ### Home Assistant Add-on (Recommended)
+
+#### Via HACS (Recommended)
+1. Open HACS in your Home Assistant instance
+2. Go to "Integrations" → "..." → "Custom repositories"
+3. Add repository URL: `https://github.com/openchargehub/ocpp-proxy`
+4. Select category: "Add-on"
+5. Click "Add"
+6. Search for "OCPP Proxy" in HACS
+7. Install the add-on
+8. Configure options via the add-on UI
+9. Start the add-on
+
+#### Manual Installation
 1. Copy this repository into your Home Assistant add-ons directory
 2. Configure options via the add-on UI
 3. Start the add-on
