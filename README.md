@@ -41,21 +41,25 @@ The proxy sits between a single EV charger and multiple backend services (energy
 
 ### Home Assistant Add-on (Recommended)
 
-#### Via HACS (Recommended)
-1. Open HACS in your Home Assistant instance
-2. Go to "Integrations" → "..." → "Custom repositories"
-3. Add repository URL: `https://github.com/openchargehub/ocpp-proxy`
-4. Select category: "Add-on"
-5. Click "Add"
-6. Search for "OCPP Proxy" in HACS
-7. Install the add-on
-8. Configure options via the add-on UI
-9. Start the add-on
+#### Via Add-on Store
+1. In Home Assistant, go to **Settings** → **Add-ons**
+2. Click the **Add-on Store** tab
+3. Click the **⋮** menu (three dots) in the top right corner
+4. Select **Repositories**
+5. Add repository URL: `https://github.com/smartenergycontrol-be/ocpp-proxy`
+6. Click **Add**
+7. Refresh the add-on store page
+8. Search for "OCPP Proxy" or browse the available add-ons
+9. Click on "OCPP Proxy" and then **Install**
+10. Configure options via the add-on **Configuration** tab
+11. Start the add-on from the **Info** tab
 
 #### Manual Installation
-1. Copy this repository into your Home Assistant add-ons directory
-2. Configure options via the add-on UI
-3. Start the add-on
+1. SSH into your Home Assistant instance
+2. Navigate to `/addons` directory
+3. Clone this repository: `git clone https://github.com/smartenergycontrol-be/ocpp-proxy.git`
+4. Restart Home Assistant
+5. The add-on will appear in your local add-ons list
 
 ### Standalone (Docker Compose)
 ```yaml
