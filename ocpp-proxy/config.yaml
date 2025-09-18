@@ -20,44 +20,20 @@ options:
   rate_limit_seconds: 10
   ocpp_services: []
 schema:
-  allow_shared_charging:
-    type: boolean
-  preferred_provider:
-    type: string
+  allow_shared_charging: bool
+  preferred_provider: str?
   blocked_providers:
-    type: array
-    items:
-      type: string
+    - str
   allowed_providers:
-    type: array
-    items:
-      type: string
-  presence_sensor:
-    type: string
-  override_input_boolean:
-    type: string
-  rate_limit_seconds:
-    type: integer
+    - str
+  presence_sensor: str?
+  override_input_boolean: str?
+  rate_limit_seconds: int(1,300)
   ocpp_services:
-    type: array
-    items:
-      type: object
-      properties:
-        id:
-          type: string
-        url:
-          type: string
-        auth_type:
-          type: string
-          enum: ['none', 'basic', 'token']
-        username:
-          type: string
-        password:
-          type: string
-        token:
-          type: string
-        enabled:
-          type: boolean
-      required:
-        - id
-        - url
+    - id: str
+      url: str
+      auth_type: list(none|basic|token)?
+      username: str?
+      password: str?
+      token: str?
+      enabled: bool?
