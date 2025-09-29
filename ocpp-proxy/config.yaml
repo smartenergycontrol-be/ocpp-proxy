@@ -1,5 +1,5 @@
 name: OCPP Proxy
-version: '0.1.1'
+version: '0.1.2'
 slug: ocpp-proxy
 description: 'OCPP 1.6 JSON WebSocket proxy for EV charger sharing'
 homeassistant_api: true

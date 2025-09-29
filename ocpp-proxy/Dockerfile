@@ -31,13 +31,10 @@ RUN \
         "PyYAML>=6.0.0" \
     && apk del .build-dependencies
 
-# Create s6-overlay service script for Home Assistant add-on
+# Create s6-overlay service for the OCPP Proxy
 RUN mkdir -p /etc/services.d/ocpp-proxy
-RUN echo '#!/usr/bin/with-contenv bashio' > /etc/services.d/ocpp-proxy/run && \
-    echo 'bashio::log.info "Starting OCPP Proxy..."' >> /etc/services.d/ocpp-proxy/run && \
-    echo 'cd /app' >> /etc/services.d/ocpp-proxy/run && \
-    echo 'exec python3 -m ocpp_proxy.main' >> /etc/services.d/ocpp-proxy/run && \
-    chmod a+x /etc/services.d/ocpp-proxy/run
+COPY run.sh /etc/services.d/ocpp-proxy/run
+RUN chmod a+x /etc/services.d/ocpp-proxy/run
 
 # Expose WebSocket port
 EXPOSE 9000
