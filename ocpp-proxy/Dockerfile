@@ -31,10 +31,9 @@ RUN \
         "PyYAML>=6.0.0" \
     && apk del .build-dependencies
 
-# Create s6-overlay service for the OCPP Proxy
-RUN mkdir -p /etc/services.d/ocpp-proxy
-COPY run.sh /etc/services.d/ocpp-proxy/run
-RUN chmod a+x /etc/services.d/ocpp-proxy/run
+# Copy and setup run script
+COPY run.sh /
+RUN chmod a+x /run.sh
 
 # Expose WebSocket port
 EXPOSE 9000
@@ -58,3 +57,6 @@ LABEL \
     org.opencontainers.image.created="${BUILD_DATE}" \
     org.opencontainers.image.revision="${BUILD_REF}" \
     org.opencontainers.image.version="${BUILD_VERSION}"
+
+# Start the run script
+CMD [ "/run.sh" ]
