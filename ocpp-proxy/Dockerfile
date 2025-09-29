@@ -31,10 +31,13 @@ RUN \
         "PyYAML>=6.0.0" \
     && apk del .build-dependencies
 
-# Create run script for Home Assistant add-on
-RUN echo '#!/bin/bash' > /run.sh && \
-    echo 'exec python3 -m ocpp_proxy.main' >> /run.sh && \
-    chmod a+x /run.sh
+# Create s6-overlay service script for Home Assistant add-on
+RUN mkdir -p /etc/services.d/ocpp-proxy
+RUN echo '#!/usr/bin/with-contenv bashio' > /etc/services.d/ocpp-proxy/run && \
+    echo 'bashio::log.info "Starting OCPP Proxy..."' >> /etc/services.d/ocpp-proxy/run && \
+    echo 'cd /app' >> /etc/services.d/ocpp-proxy/run && \
+    echo 'exec python3 -m ocpp_proxy.main' >> /etc/services.d/ocpp-proxy/run && \
+    chmod a+x /etc/services.d/ocpp-proxy/run
 
 # Expose WebSocket port
 EXPOSE 9000
@@ -58,6 +61,3 @@ LABEL \
     org.opencontainers.image.created="${BUILD_DATE}" \
     org.opencontainers.image.revision="${BUILD_REF}" \
     org.opencontainers.image.version="${BUILD_VERSION}"
-
-# Default command (can be overridden by run script)
-CMD ["/run.sh"]
